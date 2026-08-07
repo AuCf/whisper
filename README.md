@@ -9,7 +9,7 @@
 [![Vue 3](https://img.shields.io/badge/Vue-3.4-brightgreen?logo=vuedotjs&style=flat-shadow)](https://vuejs.org/)
 [![License](https://img.shields.io/badge/license-MIT-green?style=flat-shadow)](LICENSE)
 
-[功能特性](#-功能特性) • [快捷键指南](#-快捷键指南) • [效果展示](#-效果展示) • [下载安装](#-下载安装) • [开发与构建](#-开发与构建)
+[功能特性](#-功能特性) • [快捷键指南](#-快捷键指南) • [下载安装](#-下载安装) • [开发与构建](#-开发与构建)
 
 </div>
 
@@ -44,14 +44,6 @@
 
 ### 🛡️ 全自定义应用模态框 (Native Modals)
 - 彻底摒弃自带 `tauri.localhost` 弹窗头的浏览器原生 `prompt()` 和 `confirm()` 警告框，全站统一使用无感调用的自研 Vue Modal 组件。
-
----
-
-## 🖼️ 效果展示
-
-| 脑图模式 (Mindmap Mode) | 编辑与实时预览 (Editor & Preview) |
-| :---: | :---: |
-| ![Mindmap View](docs/images/mindmap.png) | ![Preview & Editor](docs/images/preview.png) |
 
 ---
 
