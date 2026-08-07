@@ -1,0 +1,304 @@
+/* =========================================================
+   Whisper — Markdown Preview Styles
+   GitHub-dark inspired, with enhancements
+   ========================================================= */
+
+.markdown-body {
+  color: var(--text-primary);
+  font-family: var(--preview-font);
+  font-size: var(--preview-size);
+  line-height: var(--preview-line-height);
+  word-wrap: break-word;
+  padding: 28px 36px 60px;
+  max-width: var(--preview-max-width);
+  margin: 0 auto;
+  user-select: text;
+}
+
+/* ─── Headings ───────────────────────────────────────────── */
+.markdown-body h1,
+.markdown-body h2,
+.markdown-body h3,
+.markdown-body h4,
+.markdown-body h5,
+.markdown-body h6 {
+  margin-top: 1.5em;
+  margin-bottom: 0.5em;
+  font-weight: 600;
+  line-height: 1.35;
+  color: var(--text-primary);
+}
+.markdown-body h1 { font-size: 2em; padding-bottom: 0.4em; border-bottom: 1px solid var(--border); }
+.markdown-body h2 { font-size: 1.5em; padding-bottom: 0.3em; border-bottom: 1px solid var(--border); }
+.markdown-body h3 { font-size: 1.25em; }
+.markdown-body h4 { font-size: 1em; }
+.markdown-body h5 { font-size: 0.875em; }
+.markdown-body h6 { font-size: 0.85em; color: var(--text-secondary); }
+
+/* Anchor links in headings */
+.markdown-body h1 .heading-anchor,
+.markdown-body h2 .heading-anchor,
+.markdown-body h3 .heading-anchor {
+  opacity: 0;
+  margin-left: 8px;
+  color: var(--accent);
+  text-decoration: none;
+  font-size: 0.8em;
+  transition: opacity var(--transition);
+}
+.markdown-body h1:hover .heading-anchor,
+.markdown-body h2:hover .heading-anchor,
+.markdown-body h3:hover .heading-anchor { opacity: 1; }
+
+/* ─── Paragraphs ─────────────────────────────────────────── */
+.markdown-body p {
+  margin-top: 0;
+  margin-bottom: 1em;
+}
+
+/* ─── Links ──────────────────────────────────────────────── */
+.markdown-body a {
+  color: var(--accent);
+  text-decoration: none;
+  border-bottom: 1px solid transparent;
+  transition: border-color var(--transition), color var(--transition);
+}
+.markdown-body a:hover {
+  color: var(--accent-hover);
+  border-bottom-color: var(--accent-hover);
+}
+
+/* ─── Images ─────────────────────────────────────────────── */
+.markdown-body img {
+  max-width: 100%;
+  border-radius: var(--radius-md);
+  box-shadow: var(--shadow-md);
+  display: block;
+  margin: 1em auto;
+}
+
+/* ─── Blockquote ─────────────────────────────────────────── */
+.markdown-body blockquote {
+  margin: 1em 0;
+  padding: 0.5em 1em;
+  border-left: 4px solid var(--accent);
+  background: var(--accent-glow);
+  border-radius: 0 var(--radius-md) var(--radius-md) 0;
+  color: var(--text-secondary);
+}
+.markdown-body blockquote p { margin-bottom: 0; }
+
+/* ─── Lists ──────────────────────────────────────────────── */
+.markdown-body ul,
+.markdown-body ol {
+  margin: 0.5em 0 1em;
+  padding-left: 1.8em;
+}
+.markdown-body li { margin: 0.25em 0; }
+.markdown-body li > ul,
+.markdown-body li > ol { margin: 0.25em 0; }
+
+/* Task list checkboxes */
+.markdown-body li:has(> input[type="checkbox"]) {
+  display: flex;
+  align-items: flex-start;
+  gap: 0.65em;
+  list-style: none;
+  margin: 0.45em 0;
+}
+.markdown-body li:has(> input[type="checkbox"]) > p {
+  margin: 0;
+}
+.markdown-body input[type="checkbox"] {
+  appearance: none;
+  -webkit-appearance: none;
+  flex: 0 0 16px;
+  width: 16px;
+  height: 16px;
+  border: 1.5px solid var(--border);
+  border-radius: 3px;
+  background: transparent;
+  margin: 0.3em 0 0;
+  position: relative;
+  cursor: default;
+  transition: background var(--transition), border-color var(--transition);
+}
+.markdown-body input[type="checkbox"]:checked {
+  background: var(--accent);
+  border-color: var(--accent);
+}
+.markdown-body input[type="checkbox"]:checked::after {
+  content: '✓';
+  position: absolute;
+  color: white;
+  font-size: 11px;
+  line-height: 1;
+  top: 1px;
+  left: 2px;
+}
+
+/* ─── Horizontal Rule ────────────────────────────────────── */
+.markdown-body hr {
+  border: none;
+  border-top: 1px solid var(--border);
+  margin: 2em 0;
+}
+
+/* ─── Tables ─────────────────────────────────────────────── */
+.markdown-body table {
+  width: 100%;
+  border-collapse: collapse;
+  margin: 1em 0;
+  font-size: 14px;
+  overflow: hidden;
+  border-radius: var(--radius-md);
+  border: 1px solid var(--border);
+}
+.markdown-body thead { background: var(--bg-elevated); }
+.markdown-body th {
+  padding: 10px 14px;
+  text-align: left;
+  font-weight: 600;
+  color: var(--text-primary);
+  border-bottom: 2px solid var(--border);
+}
+.markdown-body td {
+  padding: 8px 14px;
+  border-bottom: 1px solid var(--border-subtle);
+  color: var(--text-secondary);
+}
+.markdown-body tr:last-child td { border-bottom: none; }
+.markdown-body tr:hover td { background: rgba(48, 54, 61, 0.3); }
+
+/* ─── Inline Code ────────────────────────────────────────── */
+.markdown-body code:not(pre code) {
+  font-family: var(--editor-font);
+  font-size: 0.875em;
+  background: var(--bg-elevated);
+  color: var(--orange);
+  padding: 2px 6px;
+  border-radius: var(--radius-sm);
+  border: 1px solid var(--border-subtle);
+}
+
+/* ─── Code Blocks ────────────────────────────────────────── */
+.markdown-body .code-block {
+  margin: 1em 0;
+  border-radius: var(--radius-md);
+  overflow: hidden;
+  background: var(--bg-base);
+  border: 1px solid var(--border);
+}
+.markdown-body .code-block-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 8px 14px;
+  background: var(--bg-elevated);
+  border-bottom: 1px solid var(--border);
+  font-family: var(--editor-font);
+  font-size: 12px;
+  color: var(--text-secondary);
+}
+.markdown-body .code-copy-btn {
+  font-size: 11px;
+  padding: 2px 8px;
+  border-radius: var(--radius-sm);
+  background: var(--bg-hover);
+  color: var(--text-secondary);
+  border: 1px solid var(--border);
+  cursor: pointer;
+  transition: all var(--transition);
+}
+.markdown-body .code-copy-btn:hover {
+  background: var(--accent-muted);
+  color: var(--accent);
+  border-color: var(--accent);
+}
+.markdown-body .code-copy-btn.copied {
+  color: var(--green);
+  border-color: var(--green);
+  background: var(--green-muted);
+}
+.markdown-body .code-block pre {
+  margin: 0;
+  overflow: visible;
+  background: transparent;
+  border: none;
+  border-radius: 0;
+}
+.markdown-body .code-block pre code {
+  display: block;
+  padding: 16px;
+  overflow-x: auto;
+  font-family: var(--editor-font);
+  font-size: 13px;
+  line-height: 1.65;
+  background: transparent;
+  color: var(--text-primary);
+  border: none;
+}
+
+
+/* ─── KaTeX Math ─────────────────────────────────────────── */
+.markdown-body .katex-display {
+  margin: 1.2em 0;
+  overflow-x: auto;
+  overflow-y: hidden;
+  padding: 0.5em 0;
+}
+.markdown-body .katex {
+  font-size: 1.05em;
+  color: var(--text-primary);
+}
+
+/* ─── Mermaid Diagrams ───────────────────────────────────── */
+.markdown-body .mermaid {
+  display: flex;
+  justify-content: center;
+  margin: 1.5em 0;
+  background: var(--bg-elevated);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-md);
+  padding: 20px;
+  overflow-x: auto;
+}
+.markdown-body .mermaid svg {
+  max-width: 100%;
+  height: auto;
+}
+
+/* ─── Footnotes ──────────────────────────────────────────── */
+.markdown-body .footnotes {
+  margin-top: 2em;
+  padding-top: 1em;
+  border-top: 1px solid var(--border);
+  font-size: 0.875em;
+  color: var(--text-secondary);
+}
+
+/* ─── Superscript / Subscript ────────────────────────────── */
+.markdown-body sup, .markdown-body sub {
+  font-size: 0.75em;
+  line-height: 0;
+  position: relative;
+  vertical-align: baseline;
+}
+.markdown-body sup { top: -0.5em; }
+.markdown-body sub { bottom: -0.25em; }
+
+/* ─── Details / Summary ──────────────────────────────────── */
+.markdown-body details {
+  margin: 1em 0;
+  border: 1px solid var(--border);
+  border-radius: var(--radius-md);
+  padding: 0.5em 1em;
+  background: var(--bg-elevated);
+}
+.markdown-body summary {
+  cursor: pointer;
+  font-weight: 500;
+  color: var(--accent);
+  list-style: none;
+}
+.markdown-body summary:hover { color: var(--accent-hover); }

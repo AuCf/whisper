@@ -1,0 +1,277 @@
+/* =========================================================
+   Whisper — Global Design System
+   Deep dark theme, JetBrains Mono + Inter
+   ========================================================= */
+
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=JetBrains+Mono:ital,wght@0,300;0,400;0,500;0,700;1,400&display=swap');
+
+/* ─── CSS Custom Properties ─────────────────────────────── */
+:root {
+  /* Background layers */
+  --bg-base:        #0d1117;
+  --bg-surface:     #161b22;
+  --bg-overlay:     #1c2128;
+  --bg-elevated:    #21262d;
+  --bg-hover:       #30363d;
+
+  /* Borders */
+  --border:         #30363d;
+  --border-subtle:  #21262d;
+  --border-focus:   #388bfd;
+
+  /* Text */
+  --text-primary:   #e6edf3;
+  --text-secondary: #8b949e;
+  --text-muted:     #484f58;
+  --text-disabled:  #3d444d;
+
+  /* Accent / Brand */
+  --accent:         #58a6ff;
+  --accent-hover:   #79b8ff;
+  --accent-muted:   rgba(88, 166, 255, 0.15);
+  --accent-glow:    rgba(88, 166, 255, 0.08);
+
+  /* Semantic colors */
+  --green:          #3fb950;
+  --green-muted:    rgba(63, 185, 80, 0.15);
+  --yellow:         #d29922;
+  --red:            #f85149;
+  --red-muted:      rgba(248, 81, 73, 0.15);
+  --purple:         #bc8cff;
+  --orange:         #ffa657;
+
+  /* Toolbar */
+  --toolbar-bg:     #161b22;
+  --toolbar-height: 44px;
+
+  /* Sidebar */
+  --sidebar-bg:     #0d1117;
+  --sidebar-width:  240px;
+
+  /* Tab bar */
+  --tab-height:     36px;
+
+  /* Status bar */
+  --statusbar-bg:   #0d1117;
+  --statusbar-height: 26px;
+
+  /* Editor */
+  --editor-bg:      #0d1117;
+  --editor-font:    'JetBrains Mono', 'Fira Code', monospace;
+  --editor-size:    14px;
+  --editor-line-height: 1.7;
+
+  /* Preview */
+  --preview-bg:     #161b22;
+  --preview-font:   'Inter', -apple-system, sans-serif;
+  --preview-size:   15px;
+  --preview-line-height: 1.8;
+  --preview-max-width: 800px;
+
+  /* Scrollbar */
+  --scrollbar-width: 6px;
+  --scrollbar-thumb: #30363d;
+  --scrollbar-thumb-hover: #484f58;
+
+  /* Transitions */
+  --transition: 150ms ease;
+  --transition-slow: 300ms ease;
+
+  /* Shadows */
+  --shadow-sm:  0 1px 3px rgba(1, 4, 9, 0.3);
+  --shadow-md:  0 4px 12px rgba(1, 4, 9, 0.4);
+  --shadow-lg:  0 8px 24px rgba(1, 4, 9, 0.5);
+
+  /* Border radius */
+  --radius-sm:  4px;
+  --radius-md:  6px;
+  --radius-lg:  10px;
+
+  /* Outline panel */
+  --outline-width: 200px;
+}
+
+/* ─── Reset & Base ───────────────────────────────────────── */
+*, *::before, *::after {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+}
+
+html, body {
+  height: 100%;
+  overflow: hidden;
+  background: var(--bg-base);
+  color: var(--text-primary);
+  font-family: var(--preview-font);
+  font-size: 14px;
+  line-height: 1.5;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+  user-select: none;
+}
+
+#app {
+  height: 100vh;
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+}
+
+/* ─── Scrollbar ──────────────────────────────────────────── */
+::-webkit-scrollbar {
+  width: var(--scrollbar-width);
+  height: var(--scrollbar-width);
+}
+::-webkit-scrollbar-track { background: transparent; }
+::-webkit-scrollbar-thumb {
+  background: var(--scrollbar-thumb);
+  border-radius: 9999px;
+}
+::-webkit-scrollbar-thumb:hover { background: var(--scrollbar-thumb-hover); }
+::-webkit-scrollbar-corner { background: transparent; }
+
+/* ─── Selection ──────────────────────────────────────────── */
+::selection {
+  background: rgba(88, 166, 255, 0.3);
+  color: var(--text-primary);
+}
+
+/* ─── Focus ring ─────────────────────────────────────────── */
+:focus-visible {
+  outline: 2px solid var(--accent);
+  outline-offset: 2px;
+}
+
+/* ─── Button base ────────────────────────────────────────── */
+button {
+  font-family: inherit;
+  font-size: 13px;
+  border: none;
+  background: none;
+  color: inherit;
+  cursor: pointer;
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  border-radius: var(--radius-sm);
+  transition: background var(--transition), color var(--transition), opacity var(--transition);
+}
+button:disabled {
+  opacity: 0.4;
+  cursor: not-allowed;
+}
+
+/* ─── Input base ─────────────────────────────────────────── */
+input, textarea {
+  font-family: inherit;
+  font-size: 13px;
+  background: var(--bg-elevated);
+  color: var(--text-primary);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-sm);
+  padding: 4px 8px;
+  outline: none;
+  transition: border-color var(--transition), box-shadow var(--transition);
+}
+input:focus, textarea:focus {
+  border-color: var(--accent);
+  box-shadow: 0 0 0 3px var(--accent-glow);
+}
+
+/* ─── Divider ────────────────────────────────────────────── */
+.divider {
+  width: 1px;
+  height: 18px;
+  background: var(--border);
+  flex-shrink: 0;
+  margin: 0 2px;
+}
+
+/* ─── Icon button ────────────────────────────────────────── */
+.icon-btn {
+  width: 28px;
+  height: 28px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: var(--radius-sm);
+  color: var(--text-secondary);
+  font-size: 14px;
+  transition: background var(--transition), color var(--transition);
+}
+.icon-btn:hover {
+  background: var(--bg-hover);
+  color: var(--text-primary);
+}
+.icon-btn.active {
+  background: var(--accent-muted);
+  color: var(--accent);
+}
+
+/* ─── Context menu ───────────────────────────────────────── */
+.context-menu {
+  position: fixed;
+  background: var(--bg-elevated);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-md);
+  box-shadow: var(--shadow-lg);
+  padding: 4px;
+  z-index: 1000;
+  min-width: 150px;
+}
+.context-menu-item {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 6px 10px;
+  border-radius: var(--radius-sm);
+  font-size: 13px;
+  color: var(--text-primary);
+  cursor: pointer;
+  transition: background var(--transition);
+}
+.context-menu-item:hover { background: var(--bg-hover); }
+.context-menu-item.danger { color: var(--red); }
+.context-menu-item.danger:hover { background: var(--red-muted); }
+
+/* ─── Tooltip ────────────────────────────────────────────── */
+[data-tooltip] {
+  position: relative;
+}
+[data-tooltip]::after {
+  content: attr(data-tooltip);
+  position: absolute;
+  bottom: calc(100% + 6px);
+  left: 50%;
+  transform: translateX(-50%);
+  background: var(--bg-elevated);
+  color: var(--text-primary);
+  font-size: 11px;
+  white-space: nowrap;
+  padding: 3px 7px;
+  border-radius: var(--radius-sm);
+  border: 1px solid var(--border);
+  pointer-events: none;
+  opacity: 0;
+  transition: opacity var(--transition);
+  z-index: 999;
+}
+[data-tooltip]:hover::after { opacity: 1; }
+
+/* ─── Animations ─────────────────────────────────────────── */
+@keyframes fadeIn {
+  from { opacity: 0; transform: translateY(-4px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+@keyframes slideInLeft {
+  from { opacity: 0; transform: translateX(-10px); }
+  to   { opacity: 1; transform: translateX(0); }
+}
+@keyframes pulse {
+  0%, 100% { opacity: 1; }
+  50%       { opacity: 0.5; }
+}
+
+.fade-in { animation: fadeIn var(--transition-slow) both; }
+.slide-in-left { animation: slideInLeft var(--transition-slow) both; }
