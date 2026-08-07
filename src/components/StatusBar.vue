@@ -11,10 +11,12 @@
 
     <!-- Right -->
     <div class="status-group">
-      <span class="status-item" title="字数">
+      <span class="status-item" title="中英文字数">
         <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="8" y1="6" x2="21" y2="6"/><line x1="8" y1="12" x2="21" y2="12"/><line x1="8" y1="18" x2="21" y2="18"/></svg>
-        {{ wordCount }} 词
+        {{ wordCount }} 字
       </span>
+      <span class="status-separator">|</span>
+      <span class="status-item" title="预计阅读时间">⏱️ {{ readingTime }}</span>
       <span class="status-separator">|</span>
       <span class="status-item" title="字符数">{{ charCount }} 字符</span>
       <span class="status-separator">|</span>
@@ -75,6 +77,13 @@ const wordCount = computed(() => {
 const lineCount = computed(() => {
   if (!content.value) return 0
   return content.value.split('\n').length
+})
+
+const readingTime = computed(() => {
+  const words = wordCount.value
+  if (!words) return '0 分钟'
+  const minutes = Math.max(1, Math.ceil(words / 350))
+  return `${minutes} 分钟`
 })
 </script>
 

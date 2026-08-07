@@ -216,8 +216,18 @@ function createEditor(initialContent) {
   return new EditorView({ state, parent: editorContainer.value })
 }
 
+function scrollToLine(lineNo) {
+  if (!view.value) return
+  const line = view.value.state.doc.line(Math.min(lineNo, view.value.state.doc.lines))
+  view.value.dispatch({
+    selection: { anchor: line.from, head: line.to },
+    scrollIntoView: true,
+  })
+  view.value.focus()
+}
+
 // ── Expose for parent ─────────────────────────────────────────
-defineExpose({ insertFormat, getScrollEl: () => view.value?.scrollDOM })
+defineExpose({ insertFormat, scrollToLine, getScrollEl: () => view.value?.scrollDOM })
 
 onMounted(() => {
   const tab = store.tabs.find(t => t.id === props.tabId)

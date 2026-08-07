@@ -13,6 +13,13 @@
       <!-- Sidebar / File tree -->
       <FileTree />
 
+      <!-- Global Search Panel (Ctrl+Shift+F) -->
+      <GlobalSearch
+        :show-search="showSearch"
+        @close="showSearch = false"
+        @jump-line="onJumpToLine"
+      />
+
       <!-- Editor + Preview pane -->
       <div class="content-pane" ref="contentPane">
         <!-- Tab bar inside content pane -->
@@ -43,6 +50,7 @@
             v-if="store.activeTab"
             ref="previewRef"
             @scroll-el="onPreviewScrollEl"
+            @jump-line="onJumpToLine"
           />
 
           <!-- Welcome screen when no tab is open -->
@@ -95,6 +103,9 @@
 
     <!-- Global Modal Dialog -->
     <ModalDialog ref="modalEl" />
+
+    <!-- Quick Open Command Palette (Ctrl+P) -->
+    <QuickOpenModal :is-open="showQuickOpen" @close="showQuickOpen = false" />
   </div>
 </template>
 
@@ -115,6 +126,8 @@ import Preview from './components/Preview.vue'
 import Outline from './components/Outline.vue'
 import StatusBar from './components/StatusBar.vue'
 import ModalDialog from './components/ModalDialog.vue'
+import GlobalSearch from './components/GlobalSearch.vue'
+import QuickOpenModal from './components/QuickOpenModal.vue'
 
 const store = useEditorStore()
 const syncScroll = useSyncScroll()
@@ -225,17 +238,32 @@ function resetResize() {
   }
 }
 
+const showSearch = ref(false)
+const showQuickOpen = ref(false)
+
+function onJumpToLine(lineNumber) {
+  editorRef.value?.scrollToLine?.(lineNumber)
+}
+
 // ── Keyboard shortcuts ────────────────────────────────────────
 function onKeydown(e) {
   const key = e.key.toLowerCase()
-  if (e.key === 'Escape' && store.focusMode) {
-    e.preventDefault()
-    store.focusMode = false
-    return
+  if (e.key === 'Escape') {
+    if (showQuickOpen.value) { showQuickOpen.value = false; return }
+    if (showSearch.value) { showSearch.value = false; return }
+    if (store.focusMode) { store.focusMode = false; return }
   }
   if (e.key === 'F11') {
     e.preventDefault()
     store.focusMode = !store.focusMode
+  }
+  if (e.ctrlKey && e.shiftKey && key === 'f') {
+    e.preventDefault()
+    showSearch.value = !showSearch.value
+  }
+  if (e.ctrlKey && key === 'p') {
+    e.preventDefault()
+    showQuickOpen.value = true
   }
   if (e.ctrlKey && e.key === '\\') {
     e.preventDefault()

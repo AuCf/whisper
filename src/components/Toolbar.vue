@@ -103,6 +103,9 @@
       <button class="icon-btn" :class="{ active: !store.showEditor && store.showPreview }" data-tooltip="仅预览" @click="setLayout('preview')">
         <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="18" height="18" rx="2"/><line x1="15" y1="3" x2="15" y2="21"/></svg>
       </button>
+      <button class="icon-btn" :class="{ active: store.showMindmap }" data-tooltip="思维导图" @click="store.showMindmap = !store.showMindmap">
+        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="3"/><path d="M12 9V3"/><path d="M12 15v6"/><path d="M15 12h6"/><path d="M9 12H3"/><path d="M16.24 7.76l4.24-4.24"/><path d="M7.76 16.24l-4.24 4.24"/><path d="M16.24 16.24l4.24 4.24"/><path d="M7.76 7.76L3.52 3.52"/></svg>
+      </button>
 
       <div class="divider"></div>
 

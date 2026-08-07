@@ -19,6 +19,7 @@ pub fn run() {
             delete_dir,
             rename_path,
             read_dir,
+            search_workspace,
         ])
         .run(tauri::generate_context!())
         .expect("error while running tauri application");

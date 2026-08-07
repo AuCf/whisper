@@ -37,6 +37,16 @@
 .markdown-body h5 { font-size: 0.875em; }
 .markdown-body h6 { font-size: 0.85em; color: var(--text-secondary); }
 
+@keyframes headingFlash {
+  0% { background: var(--accent-muted); box-shadow: 0 0 0 4px var(--accent-glow); }
+  100% { background: transparent; box-shadow: none; }
+}
+
+.heading-highlight-flash {
+  animation: headingFlash 1.5s ease-out;
+  border-radius: var(--radius-sm);
+}
+
 /* Anchor links in headings */
 .markdown-body h1 .heading-anchor,
 .markdown-body h2 .heading-anchor,

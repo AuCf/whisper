@@ -26,6 +26,7 @@ export const useEditorStore = defineStore('editor', () => {
   const theme = ref('dark') // 'dark' | 'light' | 'solarized'
   const previewStyle = ref('github') // 'github' | 'vitepress' | 'editorial' | 'morandi' | 'wechat'
   const sidebarMini = ref(false)
+  const showMindmap = ref(false)
 
   // ── Computed ───────────────────────────────────────────────
   const activeTab = computed(() =>
@@ -535,7 +536,7 @@ export const useEditorStore = defineStore('editor', () => {
   return {
     // State
     workspaces, workspacePath, activeWorkspace, fileTree, tabs, activeTabId, activeTab, activeContent,
-    showSidebar, showOutline, focusMode, showPreview, showEditor,
+    showSidebar, showOutline, focusMode, showPreview, showEditor, showMindmap,
     cursorLine, cursorColumn, theme, previewStyle, sidebarMini,
     // Tab actions
     openTab, closeTab, closeActiveTab, setActiveTab, updateContent, setCursorPosition,

@@ -138,3 +138,73 @@ fn read_dir_recursive(path: &str) -> std::io::Result<Vec<FileEntry>> {
     });
     Ok(entries)
 }
+
+#[derive(Serialize)]
+pub struct SearchMatch {
+    pub line_number: usize,
+    pub line_text: String,
+}
+
+#[derive(Serialize)]
+pub struct SearchResult {
+    pub file_name: String,
+    pub file_path: String,
+    pub matches: Vec<SearchMatch>,
+}
+
+fn search_dir_recursive(path: &str, query: &str, results: &mut Vec<SearchResult>) -> std::io::Result<()> {
+    if query.is_empty() {
+        return Ok(());
+    }
+    let query_lower = query.to_lowercase();
+    for entry in fs::read_dir(path)? {
+        let entry = entry?;
+        let meta = entry.metadata()?;
+        let entry_path = entry.path();
+        let name = entry.file_name().to_string_lossy().to_string();
+        let path_str = entry_path.to_string_lossy().to_string();
+
+        if meta.is_dir() {
+            if !name.starts_with('.') && name != "node_modules" && name != "target" && name != "dist" {
+                let _ = search_dir_recursive(&path_str, query, results);
+            }
+        } else {
+            let ext = entry_path.extension().and_then(|e| e.to_str()).unwrap_or("").to_lowercase();
+            if matches!(ext.as_str(), "md" | "markdown" | "txt" | "mdx") {
+                if let Ok(content) = fs::read_to_string(&entry_path) {
+                    let mut matches = vec![];
+                    for (idx, line) in content.lines().enumerate() {
+                        if line.to_lowercase().contains(&query_lower) {
+                            matches.push(SearchMatch {
+                                line_number: idx + 1,
+                                line_text: line.trim().to_string(),
+                            });
+                            if matches.len() >= 50 {
+                                break;
+                            }
+                        }
+                    }
+                    if !matches.is_empty() {
+                        results.push(SearchResult {
+                            file_name: name,
+                            file_path: path_str,
+                            matches,
+                        });
+                    }
+                }
+            }
+        }
+    }
+    Ok(())
+}
+
+#[command]
+pub fn search_workspace(path: String, query: String) -> Result<Vec<SearchResult>, String> {
+    let mut results = vec![];
+    let query = query.trim();
+    if query.is_empty() {
+        return Ok(results);
+    }
+    search_dir_recursive(&path, query, &mut results).map_err(|e| e.to_string())?;
+    Ok(results)
+}

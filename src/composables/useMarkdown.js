@@ -234,6 +234,42 @@ function bindCodeCopyButtons(container) {
   }
 }
 
+export function generateMindmapCode(markdownContent) {
+  if (!markdownContent) return ''
+  const headings = []
+
+  try {
+    const tokens = marked.lexer(markdownContent)
+    for (const token of tokens) {
+      if (token.type === 'heading') {
+        const text = token.text.replace(/[()\[\]{}"`:\r\n]/g, ' ').replace(/\s+/g, ' ').trim()
+        if (text) {
+          headings.push({ level: token.depth, text })
+        }
+      }
+    }
+  } catch (err) {
+    console.error('Parse headings for mindmap failed:', err)
+  }
+
+  if (headings.length === 0) {
+    return 'mindmap\n  root((文档大纲))\n    未找到大纲标题'
+  }
+
+  let code = 'mindmap\n'
+  const first = headings[0]
+  code += `  root((${first.text}))\n`
+
+  for (let i = 1; i < headings.length; i++) {
+    const h = headings[i]
+    const indentCount = 2 + (h.level - 1) * 2
+    const indent = ' '.repeat(indentCount)
+    code += `${indent}${h.text}\n`
+  }
+
+  return code
+}
+
 export function useMarkdown() {
   function render(markdown) {
     if (!markdown) return ''
@@ -251,5 +287,5 @@ export function useMarkdown() {
     await renderMermaid(container)
   }
 
-  return { render, postProcess }
+  return { render, postProcess, reinitMermaid }
 }
