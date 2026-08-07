@@ -1,65 +1,115 @@
-# Whisper
+<div align="center">
 
-Whisper 是一个基于 Tauri 2、Vue 3 和 CodeMirror 6 的本地 Markdown 编辑与实时预览工具。
+# 📝 Whisper Markdown Editor
 
-## 环境准备
+**一款基于 Tauri 2.0 + Vue 3 + CodeMirror 6 构建的高性能、极简美观的本地 Markdown 编辑与实时预览桌面应用**
 
-需要安装：
+[![Release](https://img.shields.io/github/v/release/AuCf/whisper?color=0969da&style=flat-shadow)](https://github.com/AuCf/whisper/releases)
+[![Tauri](https://img.shields.io/badge/Tauri-2.0-blue?logo=tauri&style=flat-shadow)](https://tauri.app/)
+[![Vue 3](https://img.shields.io/badge/Vue-3.4-brightgreen?logo=vuedotjs&style=flat-shadow)](https://vuejs.org/)
+[![License](https://img.shields.io/badge/license-MIT-green?style=flat-shadow)](LICENSE)
 
-- Node.js 和 npm
-- Rust、Cargo
-- Windows C++ 构建工具
+[功能特性](#-功能特性) • [快捷键指南](#-快捷键指南) • [效果展示](#-效果展示) • [下载安装](#-下载安装) • [开发与构建](#-开发与构建)
 
-首次拉取项目后安装前端依赖：
+</div>
 
-```powershell
+---
+
+## ✨ 功能特性
+
+### 🧠 交互式思维导图模式 (Mindmap Mode)
+- **大纲可视化**：基于 `marked` AST 语法树，自动解析文档 `H1~H6` 标题生成交互式思维导图。
+- **自由交互**：支持画布鼠标拖拽平移、滚轮 0.4x ~ 3x 无级缩放与一键复位。
+- **点击精准跳转**：点击思维导图中的任意标题节点，自动退出导图并平滑滚动（Smooth Scroll）至预览区与编辑区的对应位置，并附带主题蓝脉冲高亮动画。
+
+### 🔍 全局工作区搜索 (`Ctrl+Shift+F`)
+- **高性能底层搜索**：Rust 后端原生快速扫描当前工作区所有子文件与子目录。
+- **实时结果预览**：面板呈现模糊匹配的文件名、行号与匹配行上下文，点击一键切换标签页并高亮定位所在行。
+
+### ⚡ 快速文件开表面板 (`Ctrl+P`)
+- **模糊检索**：输入关键字快速搜索全工作区项目文件，支持键盘上下键选择与 `Enter` 快速打开。
+
+### 🎨 独立双重排版预设与主题控制
+- **渲染排版预设**：内置 **GitHub Standard** 与 **VitePress Tech** 两套现代化渲染样式，一键无缝切换。
+- **多色主题选择**：支持 **Dark (暗黑)**、**Light (GitHub 亮白)**、**Solarized Dark (日光暗青)** 深度主题。
+- **无 AI 味道极简设计**：精致消光配色，摒弃刺眼紫与高饱和渐变，提供极佳的沉浸式写作体验。
+
+### 📑 状态持久化与多标签管理
+- **会话持久化 (Tabs Session Persistence)**：应用关闭或重新启动时，自动还原上次打开的所有文件标签页与当前激活的文档。
+- **文件树智能排重**：避免同名文件夹节点重复渲染与意外碰撞报错。
+
+### 📊 增强型阅读状态栏
+- **精确字数统计**：独立区分**中文字数**、**英文单词数**、**总字符数**。
+- **预估阅读时长**：实时计算 `⏱️ 预计阅读 X 分钟`，助您把握文章篇幅。
+
+### 🛡️ 全自定义应用模态框 (Native Modals)
+- 彻底摒弃自带 `tauri.localhost` 弹窗头的浏览器原生 `prompt()` 和 `confirm()` 警告框，全站统一使用无感调用的自研 Vue Modal 组件。
+
+---
+
+## 🖼️ 效果展示
+
+| 脑图模式 (Mindmap Mode) | 编辑与实时预览 (Editor & Preview) |
+| :---: | :---: |
+| ![Mindmap View](docs/images/mindmap.png) | ![Preview & Editor](docs/images/preview.png) |
+
+---
+
+## ⌨️ 快捷键指南
+
+| 快捷键 | 功能说明 |
+| :--- | :--- |
+| `Ctrl + N` | 新建空白 Markdown 草稿 |
+| `Ctrl + O` | 打开本地 Markdown 文件 |
+| `Ctrl + S` | 保存当前文件 |
+| `Ctrl + Shift + F` | 开启/关闭 **工作区全局搜索** |
+| `Ctrl + P` | 开启/关闭 **文件快速查找面板** |
+| `Ctrl + F` | 编辑器内部代码文本查找与替换 |
+| `Ctrl + B` | 粗体文本 (`**bold**`) |
+| `Ctrl + I` | 斜体文本 (`*italic*`) |
+| `Ctrl + K` | 插入超链接 (`[title](url)`) |
+| `Ctrl + /` | 切换单行注释 (`<!-- comment -->`) |
+
+---
+
+## 📦 下载安装
+
+请前往 [GitHub Releases](https://github.com/AuCf/whisper/releases) 下载适合您操作系统的最新安装包：
+
+- **Windows**: `Whisper_x64-setup.exe` (NSIS 安装包) 或 `Whisper_x64.msi`
+- **macOS**: `Whisper_aarch64.dmg` (Apple Silicon M 系列芯片) / `Whisper_x64.dmg` (Intel 芯片)
+
+---
+
+## 🛠️ 开发与构建
+
+### 1. 环境准备
+确保您的计算机上已安装：
+- **Node.js** (>= 18) 和 `npm`
+- **Rust** & `cargo`
+- C++ 编译环境 (Windows 上需安装 Visual Studio C++ Build Tools)
+
+### 2. 克隆与依赖安装
+```bash
+git clone https://github.com/AuCf/whisper.git
+cd mdPreview
 npm install
 ```
 
-如果 PowerShell 提示找不到 `cargo`，在当前终端临时加入 Rust 工具目录：
-
-```powershell
-$env:Path = "$env:USERPROFILE\.cargo\bin;$env:Path"
-```
-
-## 开发启动
-
-启动 Tauri 开发版窗口：
-
-```powershell
+### 3. 开发启动
+```bash
 npm run tauri dev
 ```
+支持前端 Vite 热重载 (HMR) 与 Tauri Rust 后端协同调试。
 
-开发模式支持前端热更新，日常功能修改优先使用该命令验证。关闭 Whisper 窗口后，开发进程会随之退出。
-
-如果只需要查看前端页面，可以运行：
-
-```powershell
-npm run dev
-```
-
-仅前端模式无法完整测试文件对话框、文件系统和窗口关闭等 Tauri 原生能力。
-
-## 正式打包
-
-生成 Windows 正式程序和安装包：
-
-```powershell
+### 4. 正式打包
+```bash
 npm run tauri build
 ```
+打包成功后，安装程序产物位于 `src-tauri/target/release/bundle/` 目录下。
 
-构建完成后的主要产物：
+---
 
-- 免安装程序：`src-tauri/target/release/whisper.exe`
-- NSIS 安装程序：`src-tauri/target/release/bundle/nsis/Whisper_0.1.0_x64-setup.exe`
-- MSI 安装包：`src-tauri/target/release/bundle/msi/Whisper_0.1.0_x64_en-US.msi`
+## 📄 开源协议
 
-如果打包时报无法删除或拒绝访问 `whisper.exe`，请先关闭正在运行的 Whisper 开发版或正式版，再重新执行打包命令。
-
-## 图标生成
-
-修改 `src-tauri/icons/icon-source.png` 后，可以重新生成 Tauri 所需的 ICO 和各尺寸图标：
-
-```powershell
-npm run tauri icon src-tauri\icons\icon-source.png
-```
+本项目基于 [MIT License](LICENSE) 协议开源。
