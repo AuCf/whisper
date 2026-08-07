@@ -1,0 +1,221 @@
+/* =========================================================
+   Whisper — Markdown Preview Typography Presets
+   5 Curated Reading Styles:
+   1. github    (Classic GitHub Markdown)
+   2. vitepress (Modern Tech / Vue / VitePress style)
+   3. editorial (Elegant Serif / Medium Magazine style)
+   4. morandi   (Low-saturation Morandi palette style)
+   5. wechat    (WeChat Official Account Card style)
+   ========================================================= */
+
+@import url('https://fonts.googleapis.com/css2?family=Merriweather:ital,wght@0,300;0,400;0,700;1,300;1,400&family=Noto+Serif+SC:wght@400;600;700&display=swap');
+
+/* ─── 1. GitHub Style (Default) ─────────────────────────── */
+.markdown-body[data-preview-style="github"] {
+  /* Uses global design system defaults */
+}
+
+/* ─── 2. VitePress Style (Modern Tech / Vue) ─────────────── */
+.markdown-body[data-preview-style="vitepress"] {
+  font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+  max-width: 820px;
+}
+
+.markdown-body[data-preview-style="vitepress"] h1,
+.markdown-body[data-preview-style="vitepress"] h2 {
+  border-bottom: none;
+  position: relative;
+  letter-spacing: -0.02em;
+}
+
+.markdown-body[data-preview-style="vitepress"] h1 {
+  color: var(--accent);
+  font-weight: 800;
+  font-size: 2.2em;
+}
+
+.markdown-body[data-preview-style="vitepress"] h2 {
+  font-size: 1.6em;
+  padding-left: 12px;
+  border-left: 4px solid var(--accent);
+}
+
+.markdown-body[data-preview-style="vitepress"] blockquote {
+  border-left: 4px solid var(--accent);
+  background: var(--bg-elevated);
+  border-radius: 8px;
+  padding: 12px 18px;
+  box-shadow: var(--shadow-sm);
+}
+
+.markdown-body[data-preview-style="vitepress"] .code-block {
+  border-radius: 10px;
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.2);
+  border: 1px solid var(--border);
+}
+
+.markdown-body[data-preview-style="vitepress"] table {
+  border-radius: 10px;
+  box-shadow: var(--shadow-sm);
+  overflow: hidden;
+}
+
+/* ─── 3. Editorial Style (Medium / Magazine Serif) ───────── */
+.markdown-body[data-preview-style="editorial"] {
+  font-family: 'Merriweather', 'Noto Serif SC', 'Georgia', serif;
+  font-size: 16px;
+  line-height: 1.95;
+  color: var(--text-primary);
+  max-width: 740px;
+}
+
+.markdown-body[data-preview-style="editorial"] h1,
+.markdown-body[data-preview-style="editorial"] h2,
+.markdown-body[data-preview-style="editorial"] h3 {
+  font-family: 'Merriweather', 'Noto Serif SC', serif;
+  font-weight: 700;
+  letter-spacing: -0.01em;
+  border-bottom: none;
+}
+
+.markdown-body[data-preview-style="editorial"] h1 {
+  font-size: 2.3em;
+  text-align: center;
+  margin-top: 1em;
+  margin-bottom: 0.8em;
+  line-height: 1.3;
+}
+
+.markdown-body[data-preview-style="editorial"] h2 {
+  font-size: 1.6em;
+  margin-top: 1.8em;
+  position: relative;
+}
+
+.markdown-body[data-preview-style="editorial"] h2::after {
+  content: '';
+  display: block;
+  width: 40px;
+  height: 2px;
+  background: var(--accent);
+  margin-top: 8px;
+}
+
+.markdown-body[data-preview-style="editorial"] blockquote {
+  border-left: none;
+  font-style: italic;
+  font-size: 1.15em;
+  text-align: center;
+  padding: 1.5em 2em;
+  margin: 2em 0;
+  position: relative;
+  background: transparent;
+  color: var(--text-secondary);
+}
+
+.markdown-body[data-preview-style="editorial"] blockquote::before {
+  content: '“';
+  font-size: 3em;
+  position: absolute;
+  top: -10px;
+  left: 10px;
+  opacity: 0.2;
+  font-family: Georgia, serif;
+}
+
+.markdown-body[data-preview-style="editorial"] code:not(pre code) {
+  font-family: var(--editor-font);
+  font-size: 0.82em;
+  padding: 3px 7px;
+}
+
+/* ─── 4. Morandi Style (Low Saturation & Soft Elegance) ──── */
+.markdown-body[data-preview-style="morandi"] {
+  font-family: 'Inter', -apple-system, sans-serif;
+  line-height: 1.85;
+}
+
+.markdown-body[data-preview-style="morandi"] h1 {
+  font-size: 1.9em;
+  color: #7b8b9a;
+  border-bottom: 2px dashed rgba(123, 139, 154, 0.3);
+  padding-bottom: 8px;
+}
+
+.markdown-body[data-preview-style="morandi"] h2 {
+  font-size: 1.45em;
+  color: #929a8a;
+  border-bottom: none;
+  display: inline-block;
+  background: rgba(146, 154, 138, 0.12);
+  padding: 4px 14px;
+  border-radius: 20px;
+}
+
+.markdown-body[data-preview-style="morandi"] h3 {
+  color: #a89f91;
+}
+
+.markdown-body[data-preview-style="morandi"] blockquote {
+  border-left: 3px solid #7b8b9a;
+  background: rgba(123, 139, 154, 0.08);
+  border-radius: 6px;
+}
+
+.markdown-body[data-preview-style="morandi"] a {
+  color: #7b8b9a;
+  border-bottom: 1px dashed #7b8b9a;
+}
+
+/* ─── 5. WeChat Style (Official Account Card Layout) ──────── */
+.markdown-body[data-preview-style="wechat"] {
+  font-family: -apple-system-font, BlinkMacSystemFont, "Helvetica Neue", "PingFang SC", "Hiragino Sans GB", "Microsoft YaHei", sans-serif;
+  font-size: 15px;
+  line-height: 1.75;
+  letter-spacing: 0.03em;
+  max-width: 720px;
+}
+
+.markdown-body[data-preview-style="wechat"] h1 {
+  font-size: 1.6em;
+  font-weight: 700;
+  text-align: center;
+  background: var(--accent-muted);
+  color: var(--accent);
+  padding: 12px 20px;
+  border-radius: 8px;
+  border-bottom: none;
+  margin: 1.5em 0 1em;
+}
+
+.markdown-body[data-preview-style="wechat"] h2 {
+  font-size: 1.35em;
+  font-weight: 700;
+  border-bottom: none;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  color: var(--text-primary);
+}
+
+.markdown-body[data-preview-style="wechat"] h2::before {
+  content: '';
+  display: inline-block;
+  width: 8px;
+  height: 18px;
+  background: var(--accent);
+  border-radius: 4px;
+}
+
+.markdown-body[data-preview-style="wechat"] blockquote {
+  border-left: 3px solid var(--accent);
+  background: var(--bg-elevated);
+  padding: 12px 16px;
+  border-radius: 4px;
+  box-shadow: var(--shadow-sm);
+}
+
+.markdown-body[data-preview-style="wechat"] .code-block {
+  border-radius: 8px;
+  box-shadow: var(--shadow-md);
+}

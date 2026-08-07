@@ -136,6 +136,30 @@
         </div>
       </div>
 
+      <!-- Preview style preset dropdown -->
+      <div class="dropdown-wrap">
+        <button class="icon-btn" data-tooltip="排版风格" @click="showStyleMenu = !showStyleMenu">
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><path d="M12 2a7 7 0 1 0 7 7"/></svg>
+        </button>
+        <div v-if="showStyleMenu" class="dropdown-menu" @mouseleave="showStyleMenu = false">
+          <div class="dropdown-item" :class="{ active: store.previewStyle === 'github' }" @click="switchStyle('github')">
+            <span style="font-weight:700;">🐙</span> GitHub 简约
+          </div>
+          <div class="dropdown-item" :class="{ active: store.previewStyle === 'vitepress' }" @click="switchStyle('vitepress')">
+            <span style="font-weight:700;">⚡</span> VitePress 科技
+          </div>
+          <div class="dropdown-item" :class="{ active: store.previewStyle === 'editorial' }" @click="switchStyle('editorial')">
+            <span style="font-weight:700;">📰</span> Editorial 杂志
+          </div>
+          <div class="dropdown-item" :class="{ active: store.previewStyle === 'morandi' }" @click="switchStyle('morandi')">
+            <span style="font-weight:700;">🌸</span> Morandi 莫兰迪
+          </div>
+          <div class="dropdown-item" :class="{ active: store.previewStyle === 'wechat' }" @click="switchStyle('wechat')">
+            <span style="font-weight:700;">📱</span> WeChat 微信排版
+          </div>
+        </div>
+      </div>
+
       <div class="divider"></div>
 
       <!-- Export dropdown -->
@@ -186,6 +210,7 @@ const emit = defineEmits(['toggle-sync', 'insert', 'export'])
 
 const store = useEditorStore()
 const showThemeMenu = ref(false)
+const showStyleMenu = ref(false)
 const showExportMenu = ref(false)
 const documentTitle = computed(() => store.activeTab?.name || '新建文档')
 
@@ -210,6 +235,11 @@ function switchTheme(name) {
   store.setTheme(name)
   reinitMermaid(name)
   showThemeMenu.value = false
+}
+
+function switchStyle(name) {
+  store.setPreviewStyle(name)
+  showStyleMenu.value = false
 }
 
 function doExport(format) {

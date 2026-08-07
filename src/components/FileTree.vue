@@ -1,10 +1,14 @@
 <template>
-  <aside class="sidebar" :class="{ hidden: !store.showSidebar || store.focusMode }">
+  <aside
+    class="sidebar"
+    :class="{ hidden: !store.showSidebar || store.focusMode, mini: store.sidebarMini }"
+    @click="store.sidebarMini ? store.toggleSidebarMini() : null"
+  >
     <!-- Sidebar header -->
     <div class="sidebar-header">
       <span class="sidebar-title">
         <svg width="12" height="12" viewBox="0 0 24 24" fill="currentColor"><path d="M22 19a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h5l2 3h9a2 2 0 0 1 2 2z"/></svg>
-        工作区
+        <span class="title-text">工作区</span>
       </span>
       <div class="sidebar-actions">
         <button class="icon-btn" data-tooltip="新建文件" @click="createRootFile">
@@ -19,11 +23,32 @@
         <button class="icon-btn" data-tooltip="刷新全部" @click="store.refreshAllWorkspaces()">
           <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="23 4 23 10 17 10"/><path d="M20.49 15a9 9 0 1 1-2.12-9.36L23 10"/></svg>
         </button>
+        <button class="icon-btn" :data-tooltip="store.sidebarMini ? '展开工作区' : '折叠为窄边栏'" @click.stop="store.toggleSidebarMini()">
+          <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="18" height="18" rx="2" ry="2"/><line x1="9" y1="3" x2="9" y2="21"/></svg>
+        </button>
       </div>
     </div>
 
+    <!-- Mini sidebar mode list -->
+    <div v-if="store.sidebarMini" class="sidebar-mini-list">
+      <div
+        v-for="workspace in store.workspaces"
+        :key="workspace.path"
+        class="mini-workspace-item"
+        :class="{ active: store.workspacePath === workspace.path }"
+        :data-tooltip="workspace.remark ? `${workspace.remark} (${workspace.name})` : workspace.name"
+        @click.stop="openWorkspaceFromMini(workspace)"
+      >
+        <svg class="mini-icon" width="16" height="16" viewBox="0 0 24 24" fill="currentColor"><path d="M22 19a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h5l2 3h9a2 2 0 0 1 2 2z"/></svg>
+        <span class="mini-letter">{{ (workspace.remark || workspace.name).slice(0, 2).toUpperCase() }}</span>
+      </div>
+      <button class="mini-add-btn" data-tooltip="打开文件夹" @click.stop="openFolder">
+        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
+      </button>
+    </div>
+
     <!-- File tree -->
-    <div class="sidebar-content" @click.self="clearSelection">
+    <div v-else class="sidebar-content" @click.self="clearSelection">
       <!-- No workspace open -->
       <div v-if="store.workspaces.length === 0" class="sidebar-empty">
         <div class="empty-icon">
@@ -43,14 +68,28 @@
           <div
             class="workspace-row"
             :class="{ active: store.workspacePath === workspace.path }"
-            :title="workspace.path"
+            :title="workspace.remark ? `${workspace.remark} (${workspace.name})\n${workspace.path}` : workspace.path"
             @click="toggleWorkspace(workspace)"
+            @contextmenu.prevent="onWorkspaceCtx($event, workspace)"
           >
             <span class="workspace-arrow" :class="{ expanded: workspace.isExpanded }">
               <svg width="9" height="9" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"><polyline points="9 18 15 12 9 6"/></svg>
             </span>
             <svg class="workspace-icon" width="13" height="13" viewBox="0 0 24 24" fill="currentColor"><path d="M22 19a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h5l2 3h9a2 2 0 0 1 2 2z"/></svg>
-            <span class="workspace-name">{{ workspace.name }}</span>
+            
+            <template v-if="workspace.remark">
+              <span class="workspace-primary-name">{{ workspace.remark }}</span>
+              <span class="workspace-secondary-name">({{ workspace.name }})</span>
+            </template>
+            <template v-else>
+              <span class="workspace-name">{{ workspace.name }}</span>
+            </template>
+
+            <button
+              class="workspace-edit-remark"
+              title="修改备注"
+              @click.stop="editWorkspaceRemark(workspace)"
+            >✎</button>
             <button
               class="workspace-remove"
               title="从工作区移除"
@@ -175,15 +214,33 @@ function toggleWorkspace(workspace) {
   store.setWorkspaceExpanded(workspace.path, !workspace.isExpanded)
 }
 
+function openWorkspaceFromMini(workspace) {
+  store.setActiveWorkspace(workspace.path)
+  store.setWorkspaceExpanded(workspace.path, true)
+  store.sidebarMini = false
+}
+
 function removeWorkspace(workspace) {
   if (!confirm(`从工作区列表移除“${workspace.name}”？\n不会删除磁盘上的文件。`)) return
   store.removeWorkspace(workspace.path)
+}
+
+function editWorkspaceRemark(workspace) {
+  const remark = prompt(`为项目“${workspace.name}”设置备注/说明：`, workspace.remark || '')
+  if (remark !== null) {
+    store.setWorkspaceRemark(workspace.path, remark)
+  }
 }
 
 function clearSelection() {}
 
 // ─── Context Menu ──────────────────────────────────────────
 const ctxMenu = ref({ visible: false, x: 0, y: 0, node: null })
+
+function onWorkspaceCtx(event, workspace) {
+  store.setActiveWorkspace(workspace.path)
+  editWorkspaceRemark(workspace)
+}
 
 function onContextMenu({ event, node }, workspacePath) {
   store.setActiveWorkspace(workspacePath)
@@ -255,6 +312,85 @@ onUnmounted(() => window.removeEventListener('keydown', onKeydown))
   width: 0;
   opacity: 0;
   pointer-events: none;
+}
+.sidebar.mini {
+  width: 52px;
+  cursor: default;
+}
+.sidebar.mini .title-text,
+.sidebar.mini .sidebar-actions > button:not(:last-child) {
+  display: none;
+}
+.sidebar.mini .sidebar-header {
+  padding: 8px 6px;
+  justify-content: center;
+}
+.sidebar.mini .sidebar-title {
+  gap: 0;
+}
+
+/* Mini Sidebar List */
+.sidebar-mini-list {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 10px;
+  padding: 12px 0;
+  flex: 1;
+  overflow-y: auto;
+}
+.mini-workspace-item {
+  width: 36px;
+  height: 36px;
+  border-radius: var(--radius-md);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  background: var(--bg-surface);
+  border: 1px solid var(--border);
+  cursor: pointer;
+  position: relative;
+  transition: all var(--transition);
+}
+.mini-workspace-item:hover {
+  background: var(--bg-hover);
+  border-color: var(--accent);
+  transform: translateY(-1px);
+}
+.mini-workspace-item.active {
+  background: var(--accent-muted);
+  border-color: var(--accent);
+  box-shadow: 0 0 8px rgba(88, 166, 255, 0.3);
+}
+.mini-icon {
+  color: var(--accent);
+}
+.mini-letter {
+  font-size: 9px;
+  font-weight: 700;
+  color: var(--text-primary);
+  line-height: 1;
+  margin-top: 1px;
+}
+.mini-add-btn {
+  width: 32px;
+  height: 32px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: var(--bg-surface);
+  border: 1px dashed var(--border);
+  color: var(--text-muted);
+  cursor: pointer;
+  transition: all var(--transition);
+  margin-top: 6px;
+}
+.mini-add-btn:hover {
+  background: var(--accent-muted);
+  border-color: var(--accent);
+  color: var(--accent);
 }
 
 .sidebar-header {
@@ -330,6 +466,39 @@ onUnmounted(() => window.removeEventListener('keydown', onKeydown))
   text-overflow: ellipsis;
   white-space: nowrap;
 }
+.workspace-primary-name {
+  font-size: 12.5px;
+  font-weight: 600;
+  color: var(--text-primary);
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+.workspace-secondary-name {
+  font-size: 11px;
+  font-weight: 400;
+  color: var(--text-muted);
+  opacity: 0.7;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  margin-right: 4px;
+}
+.workspace-edit-remark {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 18px;
+  height: 18px;
+  border-radius: 3px;
+  color: var(--text-muted);
+  font-size: 11px;
+  line-height: 1;
+  opacity: 0;
+  transition: opacity var(--transition), background var(--transition), color var(--transition);
+}
+.workspace-row:hover .workspace-edit-remark { opacity: 1; }
+.workspace-edit-remark:hover { background: var(--bg-hover); color: var(--accent); }
 .workspace-remove {
   display: flex;
   align-items: center;

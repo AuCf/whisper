@@ -7,6 +7,7 @@
       <div
         ref="contentEl"
         class="markdown-body"
+        :data-preview-style="store.previewStyle"
         v-html="renderedHtml"
       ></div>
     </div>
@@ -65,5 +66,8 @@ defineExpose({
   flex: 1;
   overflow-y: auto;
   overflow-x: hidden;
+  padding: 24px 32px 40px;
+  display: flex;
+  justify-content: center;
 }
 </style>

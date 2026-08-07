@@ -84,8 +84,8 @@ const editorTheme = EditorView.theme({
   '.tok-variableName': { color: '#ffa657' },
   '.tok-typeName': { color: '#ffa657' },
   '.tok-propertyName': { color: '#79c0ff' },
-  '.tok-punctuation': { color: '#8b949e' },
-  '.tok-meta': { color: '#8b949e' },
+  '.tok-punctuation': { color: 'rgba(139, 148, 158, 0.45)' },
+  '.tok-meta': { color: 'rgba(139, 148, 158, 0.5)' },
   '.tok-atom': { color: '#79c0ff' },
 }, { dark: true })
 

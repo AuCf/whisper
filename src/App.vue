@@ -8,9 +8,6 @@
       @export="onExport"
     />
 
-    <!-- Tab bar -->
-    <TabBar />
-
     <!-- Main content area -->
     <div class="main-area">
       <!-- Sidebar / File tree -->
@@ -18,65 +15,72 @@
 
       <!-- Editor + Preview pane -->
       <div class="content-pane" ref="contentPane">
-        <!-- Editor -->
-        <Editor
-          v-if="store.activeTab"
-          :key="store.activeTabId"
-          ref="editorRef"
-          :tab-id="store.activeTabId"
-          @update="onContentUpdate"
-          @scroll-el="onEditorScrollEl"
-        />
+        <!-- Tab bar inside content pane -->
+        <TabBar />
 
-        <!-- Divider (only in split mode) -->
-        <div
-          v-if="store.activeTab && store.showEditor && store.showPreview"
-          class="pane-divider"
-          @mousedown="startResize"
-        ></div>
+        <div class="pane-body">
+          <!-- Editor -->
+          <Editor
+            v-if="store.activeTab"
+            :key="store.activeTabId"
+            ref="editorRef"
+            :tab-id="store.activeTabId"
+            @update="onContentUpdate"
+            @scroll-el="onEditorScrollEl"
+          />
 
-        <!-- Preview -->
-        <Preview
-          v-if="store.activeTab"
-          ref="previewRef"
-          @scroll-el="onPreviewScrollEl"
-        />
+          <!-- Divider (only in split mode) -->
+          <div
+            v-if="store.activeTab && store.showEditor && store.showPreview"
+            class="pane-divider"
+            title="拖拽调整宽度，双击恢复 50% 平分"
+            @mousedown="startResize"
+            @dblclick="resetResize"
+          ></div>
 
-        <!-- Welcome screen when no tab is open -->
-        <div v-if="!store.activeTab" class="welcome-screen">
-          <div class="welcome-content">
-            <div class="welcome-logo">
-              <svg width="64" height="64" viewBox="0 0 24 24" fill="none" stroke="url(#grad)" stroke-width="1.5">
-                <defs>
-                  <linearGradient id="grad" x1="0%" y1="0%" x2="100%" y2="100%">
-                    <stop offset="0%" style="stop-color:#58a6ff"/>
-                    <stop offset="100%" style="stop-color:#bc8cff"/>
-                  </linearGradient>
-                </defs>
-                <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/>
-                <polyline points="14 2 14 8 20 8"/>
-                <line x1="16" y1="13" x2="8" y2="13"/>
-                <line x1="16" y1="17" x2="8" y2="17"/>
-                <polyline points="10 9 9 9 8 9"/>
-              </svg>
-            </div>
-            <h1 class="welcome-title">Whisper</h1>
-            <p class="welcome-subtitle">优雅的 Markdown 编辑器</p>
-            <div class="welcome-actions">
-              <button class="welcome-btn primary" @click="store.newDocument()">
-                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
-                新建文件
-              </button>
-              <button class="welcome-btn" @click="openFolder">
-                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M22 19a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h5l2 3h9a2 2 0 0 1 2 2z"/></svg>
-                打开文件夹
-              </button>
-            </div>
-            <div class="welcome-shortcuts">
-              <div class="shortcut"><kbd>Ctrl+S</kbd><span>保存</span></div>
-              <div class="shortcut"><kbd>Ctrl+B</kbd><span>加粗</span></div>
-              <div class="shortcut"><kbd>Ctrl+I</kbd><span>斜体</span></div>
-              <div class="shortcut"><kbd>F11</kbd><span>专注模式</span></div>
+          <!-- Preview -->
+          <Preview
+            v-if="store.activeTab"
+            ref="previewRef"
+            @scroll-el="onPreviewScrollEl"
+          />
+
+          <!-- Welcome screen when no tab is open -->
+          <div v-if="!store.activeTab" class="welcome-screen">
+            <div class="welcome-content">
+              <div class="welcome-logo">
+                <svg width="64" height="64" viewBox="0 0 24 24" fill="none" stroke="url(#grad)" stroke-width="1.5">
+                  <defs>
+                    <linearGradient id="grad" x1="0%" y1="0%" x2="100%" y2="100%">
+                      <stop offset="0%" style="stop-color:#388bfd"/>
+                      <stop offset="100%" style="stop-color:#58a6ff"/>
+                    </linearGradient>
+                  </defs>
+                  <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/>
+                  <polyline points="14 2 14 8 20 8"/>
+                  <line x1="16" y1="13" x2="8" y2="13"/>
+                  <line x1="16" y1="17" x2="8" y2="17"/>
+                  <polyline points="10 9 9 9 8 9"/>
+                </svg>
+              </div>
+              <h2 class="welcome-title">Whisper Markdown</h2>
+              <p class="welcome-subtitle">离线、高颜值的全平台 Markdown 编辑器</p>
+              <div class="welcome-actions">
+                <button class="welcome-btn primary" @click="store.newDocument()">
+                  <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
+                  新建文档
+                </button>
+                <button class="welcome-btn" @click="openFolder">
+                  <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M22 19a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h5l2 3h9a2 2 0 0 1 2 2z"/></svg>
+                  打开文件夹
+                </button>
+              </div>
+              <div class="welcome-shortcuts">
+                <div class="shortcut"><kbd>Ctrl+S</kbd><span>保存</span></div>
+                <div class="shortcut"><kbd>Ctrl+B</kbd><span>加粗</span></div>
+                <div class="shortcut"><kbd>Ctrl+I</kbd><span>斜体</span></div>
+                <div class="shortcut"><kbd>F11</kbd><span>专注模式</span></div>
+              </div>
             </div>
           </div>
         </div>
@@ -178,7 +182,7 @@ let startEditorWidth = 0
 function startResize(e) {
   isResizing = true
   startX = e.clientX
-  const pane = contentPane.value
+  const pane = contentPane.value?.querySelector('.pane-body')
   const editorEl = pane?.querySelector('.editor-wrap')
   if (editorEl) startEditorWidth = editorEl.offsetWidth
   document.addEventListener('mousemove', onResize)
@@ -189,7 +193,7 @@ function startResize(e) {
 
 function onResize(e) {
   if (!isResizing) return
-  const pane = contentPane.value
+  const pane = contentPane.value?.querySelector('.pane-body')
   const editorEl = pane?.querySelector('.editor-wrap')
   if (!editorEl || !pane) return
   const dx = e.clientX - startX
@@ -204,6 +208,15 @@ function stopResize() {
   document.removeEventListener('mouseup', stopResize)
   document.body.style.cursor = ''
   document.body.style.userSelect = ''
+}
+
+function resetResize() {
+  const pane = contentPane.value?.querySelector('.pane-body')
+  const editorEl = pane?.querySelector('.editor-wrap')
+  if (editorEl) {
+    editorEl.style.flex = '1'
+    editorEl.style.width = ''
+  }
 }
 
 // ── Keyboard shortcuts ────────────────────────────────────────
@@ -234,6 +247,7 @@ function onKeydown(e) {
 
 onMounted(() => {
   store.initTheme()
+  store.initPreviewStyle()
   store.restoreWorkspaces()
   window.addEventListener('keydown', onKeydown)
   appWindow.onCloseRequested(async (event) => {
@@ -269,6 +283,18 @@ onMounted(() => {
 - **Mermaid 图表** — 流程图、时序图、甘特图
 - **多标签页** — 同时管理多个文件
 - **文件树** — 打开整个工作区文件夹
+- **排版风格预设** — 顶部工具栏 🎨 支持 GitHub、VitePress、Editorial、Morandi、WeChat 五大精美风格
+
+---
+
+> [!NOTE]
+> 提示：Whisper 支持 GitHub 风格的 Alert 告警提示框！
+
+> [!TIP]
+> 建议：按 \`F11\` 进入专注模式，隐藏工具栏专注写作。
+
+> [!WARNING]
+> 警告：未保存的文件标签页上会有黄色小圆点提示。
 
 ---
 
@@ -380,11 +406,19 @@ onUnmounted(() => {
 }
 
 .content-pane {
-  display: flex;
   flex: 1;
-  overflow: hidden;
   min-width: 0;
+  display: flex;
+  flex-direction: column;
+  background: var(--bg-base);
+  overflow: hidden;
+}
+.pane-body {
+  flex: 1;
+  min-height: 0;
+  display: flex;
   position: relative;
+  overflow: hidden;
 }
 
 /* Pane divider */
@@ -393,13 +427,14 @@ onUnmounted(() => {
   background: var(--border);
   cursor: col-resize;
   flex-shrink: 0;
-  transition: background var(--transition);
+  transition: all var(--transition);
   position: relative;
   z-index: 5;
 }
 .pane-divider:hover,
 .pane-divider:active {
   background: var(--accent);
+  box-shadow: 0 0 10px var(--accent-glow);
 }
 .pane-divider::after {
   content: '';
@@ -433,12 +468,9 @@ onUnmounted(() => {
   margin-bottom: 8px;
 }
 .welcome-title {
-  font-size: 2.5rem;
+  font-size: 2.2rem;
   font-weight: 700;
-  background: linear-gradient(135deg, #58a6ff, #bc8cff);
-  -webkit-background-clip: text;
-  -webkit-text-fill-color: transparent;
-  background-clip: text;
+  color: var(--text-primary);
   letter-spacing: -0.5px;
 }
 .welcome-subtitle {

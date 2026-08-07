@@ -20,20 +20,24 @@
       </button>
     </div>
 
-    <!-- File -->
-    <div
-      v-else
-      class="tree-item tree-file"
-      :class="{ active: isActiveFile }"
-      :style="{ paddingLeft: depth * 14 + 18 + 'px' }"
-      @click="openFile"
-      @contextmenu.prevent="onCtx($event)"
-    >
-      <span class="tree-icon file-icon">
-        <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/></svg>
-      </span>
-      <span class="tree-name">{{ node.name }}</span>
-    </div>
+      <!-- File -->
+      <div
+        class="tree-item tree-file"
+        :class="[{ active: isActiveFile }, `ext-${fileExt}`]"
+        :style="{ paddingLeft: depth * 14 + 18 + 'px' }"
+        @click="openFile"
+        @contextmenu.prevent="onCtx($event)"
+      >
+        <span class="tree-icon file-icon" :class="`icon-${fileExt}`">
+          <!-- Markdown icon -->
+          <svg v-if="['md', 'markdown', 'mdx'].includes(fileExt)" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><path d="M9 13v-3l2 2 2-2v3"/></svg>
+          <!-- Image icon -->
+          <svg v-else-if="['png', 'jpg', 'jpeg', 'gif', 'svg', 'webp'].includes(fileExt)" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="18" height="18" rx="2" ry="2"/><circle cx="8.5" cy="8.5" r="1.5"/><polyline points="21 15 16 10 5 21"/></svg>
+          <!-- Default file icon -->
+          <svg v-else width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/></svg>
+        </span>
+        <span class="tree-name">{{ node.name }}</span>
+      </div>
 
     <!-- Children -->
     <template v-if="node.is_dir && isExpanded">
@@ -97,6 +101,12 @@ const isActiveFile = computed(() =>
   store.activeTab?.path === props.node.path
 )
 
+const fileExt = computed(() => {
+  if (props.node.is_dir) return ''
+  const parts = props.node.name.split('.')
+  return parts.length > 1 ? parts.pop().toLowerCase() : ''
+})
+
 function toggleExpand() {
   store.setActiveWorkspace(props.workspacePath)
   isExpanded.value = !isExpanded.value
@@ -155,7 +165,11 @@ function onCtx(event) {
 }
 .tree-item:hover { background: var(--bg-hover); color: var(--text-primary); }
 .tree-item:hover .tree-action-btn { opacity: 1; }
-.tree-file.active { background: var(--accent-muted); color: var(--accent); }
+.tree-file.active {
+  background: var(--accent-muted);
+  color: var(--accent);
+  font-weight: 500;
+}
 .tree-file.active .file-icon { color: var(--accent); }
 
 .tree-arrow {
@@ -173,6 +187,12 @@ function onCtx(event) {
 .tree-icon { flex-shrink: 0; display: flex; align-items: center; }
 .dir-icon { color: #79b8ff; }
 .file-icon { color: var(--text-muted); }
+
+/* Extension-specific icon colors */
+.icon-md, .icon-markdown, .icon-mdx { color: var(--accent); }
+.icon-png, .icon-jpg, .icon-jpeg, .icon-gif, .icon-svg, .icon-webp { color: var(--green); }
+.icon-json { color: var(--yellow); }
+.icon-txt { color: var(--text-secondary); }
 
 .tree-name { flex: 1; overflow: hidden; text-overflow: ellipsis; }
 

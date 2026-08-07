@@ -23,6 +23,8 @@ export const useEditorStore = defineStore('editor', () => {
   const cursorLine = ref(1)
   const cursorColumn = ref(1)
   const theme = ref('dark') // 'dark' | 'light' | 'solarized'
+  const previewStyle = ref('github') // 'github' | 'vitepress' | 'editorial' | 'morandi' | 'wechat'
+  const sidebarMini = ref(false)
 
   // ── Computed ───────────────────────────────────────────────
   const activeTab = computed(() =>
@@ -246,6 +248,7 @@ export const useEditorStore = defineStore('editor', () => {
       items: workspaces.value.map(workspace => ({
         path: workspace.path,
         isExpanded: workspace.isExpanded,
+        remark: workspace.remark || '',
       })),
     }
     localStorage.setItem(WORKSPACES_KEY, JSON.stringify(value))
@@ -269,6 +272,13 @@ export const useEditorStore = defineStore('editor', () => {
     if (!workspace) return
     workspace.isExpanded = isExpanded
     workspacePath.value = path
+    persistWorkspaces()
+  }
+
+  function setWorkspaceRemark(path, remark) {
+    const workspace = workspaces.value.find(item => item.path === path)
+    if (!workspace) return
+    workspace.remark = remark?.trim() || ''
     persistWorkspaces()
   }
 
@@ -327,6 +337,7 @@ export const useEditorStore = defineStore('editor', () => {
           path: item.path,
           name: workspaceName(item.path),
           isExpanded: item.isExpanded !== false,
+          remark: item.remark || '',
           tree,
         }
       } catch (err) {
@@ -420,18 +431,35 @@ export const useEditorStore = defineStore('editor', () => {
     })
   }
 
+  // ── Preview Style Preset ─────────────────────────────────────
+  function initPreviewStyle() {
+    const saved = localStorage.getItem('whisper-preview-style') || 'github'
+    setPreviewStyle(saved)
+  }
+
+  function setPreviewStyle(name) {
+    const validStyles = ['github', 'vitepress', 'editorial', 'morandi', 'wechat']
+    if (!validStyles.includes(name)) name = 'github'
+    previewStyle.value = name
+    localStorage.setItem('whisper-preview-style', name)
+  }
+
+  function toggleSidebarMini() {
+    sidebarMini.value = !sidebarMini.value
+  }
+
   return {
     // State
     workspaces, workspacePath, activeWorkspace, fileTree, tabs, activeTabId, activeTab, activeContent,
     showSidebar, showOutline, focusMode, showPreview, showEditor,
-    cursorLine, cursorColumn, theme,
+    cursorLine, cursorColumn, theme, previewStyle, sidebarMini,
     // Tab actions
     openTab, closeTab, closeActiveTab, setActiveTab, updateContent, setCursorPosition,
     // File actions
     openFile, saveFile, saveFileAs, saveActiveFile, createNewFile, createNewDir, deletePath,
     renamePath, openWorkspace, restoreWorkspaces, refreshFileTree, refreshAllWorkspaces,
-    setActiveWorkspace, setWorkspaceExpanded, removeWorkspace, newDocument, scheduleAutoSave,
-    // Theme
-    initTheme, setTheme,
+    setActiveWorkspace, setWorkspaceExpanded, setWorkspaceRemark, removeWorkspace, newDocument, scheduleAutoSave,
+    // Theme & Preview Style & Sidebar Mini
+    initTheme, setTheme, initPreviewStyle, setPreviewStyle, toggleSidebarMini,
   }
 })

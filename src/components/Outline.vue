@@ -18,7 +18,7 @@
         v-for="(h, i) in headings"
         :key="i"
         class="outline-item"
-        :class="`outline-h${h.level}`"
+        :class="[`outline-h${h.level}`, { active: activeHeadingId === h.id }]"
         :style="{ paddingLeft: (h.level - 1) * 10 + 8 + 'px' }"
         @click="scrollTo(h.id)"
       >
@@ -30,11 +30,13 @@
 </template>
 
 <script setup>
-import { computed } from 'vue'
+import { ref, computed, onMounted, onUnmounted, watch } from 'vue'
 import { useEditorStore } from '../stores/editorStore.js'
 import { createHeadingSlugger } from '../markdown/headingAnchors.js'
 
 const store = useEditorStore()
+const activeHeadingId = ref(null)
+let observer = null
 
 const headings = computed(() => {
   const content = store.activeContent
@@ -54,12 +56,41 @@ const headings = computed(() => {
   return result
 })
 
+function updateActiveHeading() {
+  if (!headings.value.length) return
+  const elements = headings.value
+    .map(h => document.getElementById(h.id))
+    .filter(Boolean)
+
+  if (!elements.length) return
+
+  let current = elements[0].id
+  for (const el of elements) {
+    const rect = el.getBoundingClientRect()
+    if (rect.top <= 120) {
+      current = el.id
+    } else {
+      break
+    }
+  }
+  activeHeadingId.value = current
+}
+
 function scrollTo(id) {
+  activeHeadingId.value = id
   const el = document.getElementById(id)
   if (el) {
     el.scrollIntoView({ behavior: 'smooth', block: 'start' })
   }
 }
+
+onMounted(() => {
+  window.addEventListener('scroll', updateActiveHeading, true)
+})
+
+onUnmounted(() => {
+  window.removeEventListener('scroll', updateActiveHeading, true)
+})
 </script>
 
 <style scoped>
@@ -120,6 +151,11 @@ function scrollTo(id) {
   overflow: hidden;
 }
 .outline-item:hover { background: var(--bg-hover); color: var(--text-primary); }
+.outline-item.active {
+  background: var(--accent-muted);
+  color: var(--accent);
+  font-weight: 500;
+}
 .outline-level-badge {
   font-size: 10px;
   font-weight: 700;
@@ -128,8 +164,11 @@ function scrollTo(id) {
   font-family: var(--editor-font);
 }
 .outline-h1 .outline-level-badge { color: var(--accent); }
-.outline-h2 .outline-level-badge { color: #79b8ff; }
-.outline-h3 .outline-level-badge { color: var(--purple); }
+.outline-h2 .outline-level-badge { color: var(--text-secondary); }
+.outline-h3 .outline-level-badge { color: var(--text-muted); }
+.outline-h4 .outline-level-badge,
+.outline-h5 .outline-level-badge,
+.outline-h6 .outline-level-badge { color: var(--text-disabled); }
 .outline-text {
   overflow: hidden;
   text-overflow: ellipsis;

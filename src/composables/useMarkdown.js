@@ -128,7 +128,7 @@ renderer.heading = function ({ text, depth }) {
   return `<h${depth} id="${id}">${text}<a class="heading-anchor" href="#${id}">#</a></h${depth}>\n`
 }
 
-// Code blocks with copy button and mermaid support
+// Code blocks with Mac OS dots, language label, and copy button
 renderer.code = function ({ text, lang }) {
   const requestedLanguage = (lang || '').trim().split(/\s+/)[0].toLowerCase()
 
@@ -142,9 +142,43 @@ renderer.code = function ({ text, lang }) {
   const displayLang = escapeHtml(requestedLanguage || 'text')
 
   return `<div class="code-block"><div class="code-block-header">
-    <span>${displayLang}</span>
+    <div class="code-header-left">
+      <div class="mac-dots">
+        <span class="mac-dot red"></span>
+        <span class="mac-dot yellow"></span>
+        <span class="mac-dot green"></span>
+      </div>
+      <span>${displayLang}</span>
+    </div>
     <button type="button" class="code-copy-btn">Copy</button>
   </div><pre><code class="hljs language-${language}">${highlighted}</code></pre></div>`
+}
+
+// Blockquotes with GitHub Alert Callouts support (> [!NOTE], > [!TIP], etc.)
+renderer.blockquote = function ({ text }) {
+  const alertMatch = text.match(/^<p>\s*\[\!(NOTE|TIP|IMPORTANT|WARNING|CAUTION)\]\s*<br\s*\/?>?\s*/i)
+    || text.match(/^<p>\s*\[\!(NOTE|TIP|IMPORTANT|WARNING|CAUTION)\]\s*/i)
+
+  if (alertMatch) {
+    const type = alertMatch[1].toUpperCase()
+    const cleanText = text.replace(alertMatch[0], '<p>')
+
+    const alertIcons = {
+      NOTE: '<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><line x1="12" y1="16" x2="12" y2="12"/><line x1="12" y1="8" x2="12.01" y2="8"/></svg>',
+      TIP: '<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M8.5 14.5A5 5 0 0 1 12 5a5 5 0 0 1 3.5 9.5c-.7.7-1.5 1.6-1.5 2.5h-4c0-.9-.8-1.8-1.5-2.5z"/><line x1="9" y1="21" x2="15" y2="21"/></svg>',
+      IMPORTANT: '<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 2a10 10 0 1 0 10 10A10 10 0 0 0 12 2zm0 14a1 1 0 1 1 0-2 1 1 0 0 1 0 2zm1-5h-2V7h2z"/></svg>',
+      WARNING: '<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="m21.73 18-8-14a2 2 0 0 0-3.48 0l-8 14A2 2 0 0 0 4 21h16a2 2 0 0 0 1.73-3z"/><line x1="12" y1="9" x2="12" y2="13"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg>',
+      CAUTION: '<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><line x1="15" y1="9" x2="9" y2="15"/><line x1="9" y1="9" x2="15" y2="15"/></svg>',
+    }
+
+    const typeLower = type.toLowerCase()
+    return `<div class="markdown-alert markdown-alert-${typeLower}">
+      <div class="markdown-alert-title">${alertIcons[type] || ''} ${type}</div>
+      <div class="markdown-alert-content">${cleanText}</div>
+    </div>`
+  }
+
+  return `<blockquote>\n${text}</blockquote>\n`
 }
 
 // Links - open in browser/new window
