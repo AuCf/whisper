@@ -14,7 +14,11 @@ jobs:
       matrix:
         include:
           - platform: 'windows-latest'
+            target: 'x86_64-pc-windows-msvc'
           - platform: 'macos-latest'
+            target: 'aarch64-apple-darwin'
+          - platform: 'macos-latest'
+            target: 'x86_64-apple-darwin'
 
     runs-on: ${{ matrix.platform }}
     steps:
@@ -27,6 +31,8 @@ jobs:
 
       - name: setup Rust
         uses: dtolnay/rust-toolchain@stable
+        with:
+          targets: ${{ matrix.target }}
 
       - name: install frontend dependencies
         run: npm ci
@@ -41,3 +47,4 @@ jobs:
           releaseBody: 'See the assets below to download the latest release.'
           releaseDraft: false
           prerelease: false
+          args: --target ${{ matrix.target }}
