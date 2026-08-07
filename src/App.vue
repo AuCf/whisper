@@ -92,6 +92,9 @@
 
     <!-- Status bar -->
     <StatusBar />
+
+    <!-- Global Modal Dialog -->
+    <ModalDialog ref="modalEl" />
   </div>
 </template>
 
@@ -103,6 +106,7 @@ import { useEditorStore } from './stores/editorStore.js'
 import { useSyncScroll } from './composables/useSyncScroll.js'
 import { useMarkdown } from './composables/useMarkdown.js'
 import { exportAsHTML, exportAsPDF, exportAsPNG } from './composables/useExport.js'
+import { registerModal, useModal } from './composables/useModal.js'
 import Toolbar from './components/Toolbar.vue'
 import TabBar from './components/TabBar.vue'
 import FileTree from './components/FileTree.vue'
@@ -110,12 +114,14 @@ import Editor from './components/Editor.vue'
 import Preview from './components/Preview.vue'
 import Outline from './components/Outline.vue'
 import StatusBar from './components/StatusBar.vue'
+import ModalDialog from './components/ModalDialog.vue'
 
 const store = useEditorStore()
 const syncScroll = useSyncScroll()
 const { render: renderMarkdown } = useMarkdown()
 const appWindow = getCurrentWindow()
 
+const modalEl = ref(null)
 const editorRef = ref(null)
 const previewRef = ref(null)
 const contentPane = ref(null)
@@ -245,15 +251,21 @@ function onKeydown(e) {
   }
 }
 
-onMounted(() => {
+onMounted(async () => {
+  registerModal(modalEl.value)
   store.initTheme()
   store.initPreviewStyle()
-  store.restoreWorkspaces()
+  await store.restoreWorkspaces()
+  const restored = await store.restoreTabsSession()
   window.addEventListener('keydown', onKeydown)
+  const modal = useModal()
   appWindow.onCloseRequested(async (event) => {
     event.preventDefault()
     const hasUnsavedChanges = store.tabs.some(tab => tab.isDirty)
-    if (hasUnsavedChanges && !confirm('仍有未保存的内容，确定退出 Whisper 吗？')) return
+    if (hasUnsavedChanges) {
+      const confirmed = await modal.confirm('仍有未保存的内容', '关闭 Whisper 将导致修改丢失，确定要退出吗？')
+      if (!confirmed) return
+    }
 
     try {
       await appWindow.destroy()
@@ -264,8 +276,8 @@ onMounted(() => {
   }).then((unlisten) => {
     cleanupCloseRequested = unlisten
   })
-  // Start with a welcome document
-  if (store.tabs.length === 0) {
+  // If no tabs session was restored, create welcome document
+  if (!restored && store.tabs.length === 0) {
     store.newDocument()
     // Populate with demo content
     nextTick(() => {

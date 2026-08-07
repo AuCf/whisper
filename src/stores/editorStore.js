@@ -6,6 +6,7 @@ import { save } from '@tauri-apps/plugin-dialog'
 
 const WORKSPACES_KEY = 'whisper-workspaces'
 const LEGACY_WORKSPACE_KEY = 'whisper-last-workspace'
+const TABS_SESSION_KEY = 'whisper-tabs-session'
 
 export const useEditorStore = defineStore('editor', () => {
   // ── Files & Workspace ──────────────────────────────────────
@@ -45,11 +46,13 @@ export const useEditorStore = defineStore('editor', () => {
     const existing = tabs.value.find(t => t.path === path)
     if (existing) {
       activeTabId.value = existing.id
+      persistTabsSession()
       return existing
     }
     const tab = { id: createTabId(), path, name, content, isDirty: false }
     tabs.value.push(tab)
     activeTabId.value = tab.id
+    persistTabsSession()
     return tab
   }
 
@@ -68,6 +71,7 @@ export const useEditorStore = defineStore('editor', () => {
       const next = tabs.value[Math.min(idx, tabs.value.length - 1)]
       activeTabId.value = next?.id ?? null
     }
+    persistTabsSession()
     return true
   }
 
@@ -78,6 +82,7 @@ export const useEditorStore = defineStore('editor', () => {
 
   function setActiveTab(id) {
     activeTabId.value = id
+    persistTabsSession()
   }
 
   function updateContent(id, content) {
@@ -85,6 +90,7 @@ export const useEditorStore = defineStore('editor', () => {
     if (tab) {
       tab.content = content
       tab.isDirty = true
+      persistTabsSession()
     }
   }
 
@@ -388,6 +394,7 @@ export const useEditorStore = defineStore('editor', () => {
     }
     tabs.value.push(tab)
     activeTabId.value = tab.id
+    persistTabsSession()
   }
 
   // ── Auto-save ──────────────────────────────────────────────
@@ -448,6 +455,83 @@ export const useEditorStore = defineStore('editor', () => {
     sidebarMini.value = !sidebarMini.value
   }
 
+  // ── Tabs Session Persistence & Restoration ────────────────────
+  function persistTabsSession() {
+    try {
+      const session = {
+        activeTabId: activeTabId.value,
+        activeTabPath: activeTab.value?.path ?? null,
+        tabs: tabs.value.map(t => ({
+          id: t.id,
+          path: t.path,
+          name: t.name,
+          isDirty: t.isDirty,
+          content: t.path ? null : t.content,
+        })),
+      }
+      localStorage.setItem(TABS_SESSION_KEY, JSON.stringify(session))
+    } catch (err) {
+      console.warn('保存标签页会话失败:', err)
+    }
+  }
+
+  async function restoreTabsSession() {
+    let saved
+    try {
+      saved = JSON.parse(localStorage.getItem(TABS_SESSION_KEY) || 'null')
+    } catch (err) {
+      console.warn('读取标签页会话记录失败:', err)
+    }
+
+    if (!saved?.tabs?.length) return false
+
+    const restoredTabs = []
+    let activeIdToSet = null
+
+    for (const item of saved.tabs) {
+      if (item.path) {
+        try {
+          const content = await invoke('read_file', { path: item.path })
+          const tab = {
+            id: item.id,
+            path: item.path,
+            name: item.name || item.path.split(/[\\/]/).pop(),
+            content,
+            isDirty: false,
+          }
+          restoredTabs.push(tab)
+          if (item.id === saved.activeTabId || item.path === saved.activeTabPath) {
+            activeIdToSet = tab.id
+          }
+        } catch (err) {
+          console.warn(`本地文件不存在或读取失败，忽略还原：${item.path}`, err)
+        }
+      } else {
+        // Unsaved draft document
+        const tab = {
+          id: item.id,
+          path: null,
+          name: item.name || 'Untitled.md',
+          content: item.content || '# Untitled\n\n',
+          isDirty: item.isDirty !== false,
+        }
+        restoredTabs.push(tab)
+        if (item.id === saved.activeTabId) {
+          activeIdToSet = tab.id
+        }
+      }
+    }
+
+    if (restoredTabs.length > 0) {
+      tabs.value = restoredTabs
+      activeTabId.value = activeIdToSet || restoredTabs[0].id
+      persistTabsSession()
+      return true
+    }
+
+    return false
+  }
+
   return {
     // State
     workspaces, workspacePath, activeWorkspace, fileTree, tabs, activeTabId, activeTab, activeContent,
@@ -459,7 +543,7 @@ export const useEditorStore = defineStore('editor', () => {
     openFile, saveFile, saveFileAs, saveActiveFile, createNewFile, createNewDir, deletePath,
     renamePath, openWorkspace, restoreWorkspaces, refreshFileTree, refreshAllWorkspaces,
     setActiveWorkspace, setWorkspaceExpanded, setWorkspaceRemark, removeWorkspace, newDocument, scheduleAutoSave,
-    // Theme & Preview Style & Sidebar Mini
-    initTheme, setTheme, initPreviewStyle, setPreviewStyle, toggleSidebarMini,
+    // Session & Theme
+    initTheme, setTheme, initPreviewStyle, setPreviewStyle, toggleSidebarMini, restoreTabsSession, persistTabsSession,
   }
 })

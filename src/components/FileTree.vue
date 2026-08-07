@@ -158,14 +158,16 @@
 import { ref, onMounted, onUnmounted } from 'vue'
 import { open } from '@tauri-apps/plugin-dialog'
 import { useEditorStore } from '../stores/editorStore.js'
+import { useModal } from '../composables/useModal.js'
 import FileTreeNode from './FileTreeNode.vue'
 
 const store = useEditorStore()
+const modal = useModal()
 
 async function createFileIn(dirPath) {
-  const name = prompt('新建 Markdown 文件：', 'Untitled.md')?.trim()
-  if (!name) return
-  const finalName = name.includes('.') ? name : `${name}.md`
+  const name = await modal.prompt('新建 Markdown 文件', 'Untitled.md', '请输入文件名')
+  if (!name || !name.trim()) return
+  const finalName = name.trim().includes('.') ? name.trim() : `${name.trim()}.md`
   try {
     await store.createNewFile(dirPath, finalName)
   } catch (_) {
@@ -174,10 +176,10 @@ async function createFileIn(dirPath) {
 }
 
 async function createDirIn(dirPath) {
-  const name = prompt('新建文件夹：', '新建文件夹')?.trim()
-  if (!name) return
+  const name = await modal.prompt('新建文件夹', '新建文件夹', '请输入文件夹名称')
+  if (!name || !name.trim()) return
   try {
-    await store.createNewDir(dirPath, name)
+    await store.createNewDir(dirPath, name.trim())
   } catch (_) {
     // The store already reports the native file-system error to the user.
   }
@@ -220,13 +222,14 @@ function openWorkspaceFromMini(workspace) {
   store.sidebarMini = false
 }
 
-function removeWorkspace(workspace) {
-  if (!confirm(`从工作区列表移除“${workspace.name}”？\n不会删除磁盘上的文件。`)) return
+async function removeWorkspace(workspace) {
+  const confirmed = await modal.confirm('移除工作区', `确定要从工作区列表移除“${workspace.name}”吗？\n（不会删除磁盘上的文件）`)
+  if (!confirmed) return
   store.removeWorkspace(workspace.path)
 }
 
-function editWorkspaceRemark(workspace) {
-  const remark = prompt(`为项目“${workspace.name}”设置备注/说明：`, workspace.remark || '')
+async function editWorkspaceRemark(workspace) {
+  const remark = await modal.prompt(`项目“${workspace.name}”的备注`, workspace.remark || '', '例如：主开发项目 / 个人笔记')
   if (remark !== null) {
     store.setWorkspaceRemark(workspace.path, remark)
   }
@@ -267,17 +270,18 @@ async function ctxCreateDir() {
 async function ctxRename() {
   const node = ctxMenu.value.node
   ctxMenu.value.visible = false
-  const newName = prompt('重命名为：', node.name)
-  if (!newName || newName === node.name) return
+  const newName = await modal.prompt('重命名', node.name, '请输入新名称')
+  if (!newName || newName.trim() === node.name) return
   const dir = node.path.substring(0, node.path.lastIndexOf('\\') + 1) ||
                node.path.substring(0, node.path.lastIndexOf('/') + 1)
-  await store.renamePath(node.path, dir + newName)
+  await store.renamePath(node.path, dir + newName.trim())
 }
 
 async function ctxDelete() {
   const node = ctxMenu.value.node
   ctxMenu.value.visible = false
-  if (!confirm(`确认删除 "${node.name}"？`)) return
+  const confirmed = await modal.confirm('确认删除', `确定要删除 "${node.name}" 吗？此操作无法撤销。`)
+  if (!confirmed) return
   try {
     if (node.is_dir) {
       await store.deletePath(node.path, true)
