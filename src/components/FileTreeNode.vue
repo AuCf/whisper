@@ -22,6 +22,7 @@
 
       <!-- File -->
       <div
+        v-else
         class="tree-item tree-file"
         :class="[{ active: isActiveFile }, `ext-${fileExt}`]"
         :style="{ paddingLeft: depth * 14 + 18 + 'px' }"
@@ -113,6 +114,7 @@ function toggleExpand() {
 }
 
 function openFile() {
+  if (props.node.is_dir) return
   store.setActiveWorkspace(props.workspacePath)
   store.openFile(props.node.path)
 }
