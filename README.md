@@ -5,6 +5,7 @@
 **一款基于 Tauri 2.0 + Vue 3 + CodeMirror 6 构建的高性能、极简美观的本地 Markdown 编辑与实时预览桌面应用**
 
 [![Release](https://img.shields.io/github/v/release/AuCf/whisper?color=0969da&style=flat-shadow)](https://github.com/AuCf/whisper/releases)
+[![Website](https://img.shields.io/badge/%F0%9F%8D%87_%E5%AE%98%E6%96%B9%E7%BD%91%E7%AB%99-aucf.github.io%2Fwhisper-0969da?style=flat-shadow)](https://aucf.github.io/whisper/)
 [![Stars](https://img.shields.io/github/stars/AuCf/whisper?style=flat-shadow&logo=github)](https://github.com/AuCf/whisper/stargazers)
 [![Downloads](https://img.shields.io/github/downloads/AuCf/whisper/total?style=flat-shadow&logo=github&color=0969da)](https://github.com/AuCf/whisper/releases)
 [![Forks](https://img.shields.io/github/forks/AuCf/whisper?style=flat-shadow&logo=github)](https://github.com/AuCf/whisper/network/members)
@@ -12,7 +13,7 @@
 [![Vue 3](https://img.shields.io/badge/Vue-3.4-brightgreen?logo=vuedotjs&style=flat-shadow)](https://vuejs.org/)
 [![License](https://img.shields.io/badge/license-MIT-green?style=flat-shadow)](LICENSE)
 
-[功能特性](#-功能特性) • [快捷键指南](#-快捷键指南) • [下载安装](#-下载安装) • [开发与构建](#-开发与构建)
+[🌐 官方网站](https://aucf.github.io/whisper/) • [功能特性](#-功能特性) • [快捷键指南](#-快捷键指南) • [下载安装](#-下载安装) • [开发与构建](#-开发与构建)
 
 </div>
 
