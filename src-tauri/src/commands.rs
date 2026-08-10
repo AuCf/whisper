@@ -2,7 +2,7 @@ use serde::{Deserialize, Serialize};
 use std::fs;
 use std::fs::OpenOptions;
 use std::path::Path;
-use tauri::command;
+use tauri::{command, Manager};
 
 #[derive(Serialize, Deserialize, Debug)]
 pub struct FileEntry {
@@ -42,6 +42,15 @@ pub fn write_binary_file(path: String, data: Vec<u8>) -> Result<(), String> {
 #[command]
 pub fn read_binary_file(path: String) -> Result<Vec<u8>, String> {
     fs::read(&path).map_err(|e| e.to_string())
+}
+
+/// Get the global app image storage directory (~/AppData/Roaming/whisper/images)
+#[command]
+pub fn get_app_image_dir(app: tauri::AppHandle) -> Result<String, String> {
+    let app_dir = app.path().app_data_dir().map_err(|e| e.to_string())?;
+    let img_dir = app_dir.join("images");
+    fs::create_dir_all(&img_dir).map_err(|e| e.to_string())?;
+    Ok(img_dir.to_string_lossy().to_string())
 }
 
 /// Create a new empty file

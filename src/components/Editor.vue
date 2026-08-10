@@ -189,16 +189,24 @@ function createEditor(initialContent) {
 
         event.preventDefault()
         const tab = store.tabs.find(item => item.id === props.tabId)
-        if (!tab) return true
 
         ;(async () => {
-          if (!tab.path) {
-            const saved = await store.saveFileAs(tab.id)
-            if (!saved) return
-          }
+          const inserted = await saveClipboardImage(image, editorView, tab?.path || null)
+          if (inserted && tab?.path) await store.saveFile(tab.id)
+        })()
 
-          const inserted = await saveClipboardImage(image, editorView, tab.path)
-          if (inserted) await store.saveFile(tab.id)
+        return true
+      },
+      drop(event, editorView) {
+        const image = getClipboardImage(event)
+        if (!image) return false
+
+        event.preventDefault()
+        const tab = store.tabs.find(item => item.id === props.tabId)
+
+        ;(async () => {
+          const inserted = await saveClipboardImage(image, editorView, tab?.path || null)
+          if (inserted && tab?.path) await store.saveFile(tab.id)
         })()
 
         return true

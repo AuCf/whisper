@@ -281,6 +281,20 @@ function onKeydown(e) {
   }
 }
 
+function onGlobalDragOver(e) {
+  e.preventDefault()
+}
+
+async function onGlobalDrop(e) {
+  if (e.target.closest('.editor-wrap')) return
+  const files = Array.from(e.dataTransfer?.files || [])
+  const mdFile = files.find(f => f.name.endsWith('.md') || f.name.endsWith('.txt') || f.name.endsWith('.markdown'))
+  if (mdFile && mdFile.path) {
+    e.preventDefault()
+    await store.openFile(mdFile.path)
+  }
+}
+
 onMounted(async () => {
   registerModal(modalEl.value)
   store.initTheme()
@@ -289,6 +303,8 @@ onMounted(async () => {
   await store.restoreWorkspaces()
   const restored = await store.restoreTabsSession()
   window.addEventListener('keydown', onKeydown)
+  window.addEventListener('dragover', onGlobalDragOver)
+  window.addEventListener('drop', onGlobalDrop)
   const modal = useModal()
   appWindow.onCloseRequested(async (event) => {
     event.preventDefault()
@@ -432,6 +448,8 @@ graph LR
 
 onUnmounted(() => {
   window.removeEventListener('keydown', onKeydown)
+  window.removeEventListener('dragover', onGlobalDragOver)
+  window.removeEventListener('drop', onGlobalDrop)
   if (cleanupSync) cleanupSync()
   cleanupCloseRequested?.()
 })

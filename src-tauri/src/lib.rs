@@ -15,6 +15,7 @@ pub fn run() {
             write_file,
             write_binary_file,
             read_binary_file,
+            get_app_image_dir,
             create_file,
             create_dir,
             delete_file,
