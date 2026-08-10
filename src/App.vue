@@ -281,17 +281,29 @@ function onKeydown(e) {
   }
 }
 
+let unlistenDragDrop = null
+
 function onGlobalDragOver(e) {
   e.preventDefault()
 }
 
 async function onGlobalDrop(e) {
-  if (e.target.closest('.editor-wrap')) return
   const files = Array.from(e.dataTransfer?.files || [])
-  const mdFile = files.find(f => f.name.endsWith('.md') || f.name.endsWith('.txt') || f.name.endsWith('.markdown'))
-  if (mdFile && mdFile.path) {
-    e.preventDefault()
-    await store.openFile(mdFile.path)
+  for (const f of files) {
+    // Standard path or name check
+    const path = f.path || f.name
+    if (path && (path.endsWith('.md') || path.endsWith('.txt') || path.endsWith('.markdown'))) {
+      e.preventDefault()
+      if (f.path) {
+        await store.openFile(f.path)
+      } else {
+        // Read file content directly fallback
+        const content = await f.text()
+        const tab = store.newDocument(f.name)
+        store.updateContent(tab.id, content)
+        tab.isDirty = false
+      }
+    }
   }
 }
 
@@ -305,6 +317,22 @@ onMounted(async () => {
   window.addEventListener('keydown', onKeydown)
   window.addEventListener('dragover', onGlobalDragOver)
   window.addEventListener('drop', onGlobalDrop)
+
+  // Native Tauri 2 file drop event listener
+  try {
+    unlistenDragDrop = await appWindow.onDragDropEvent(async (event) => {
+      if (event.payload.type === 'drop') {
+        const paths = event.payload.paths || []
+        for (const filePath of paths) {
+          if (filePath.endsWith('.md') || filePath.endsWith('.txt') || filePath.endsWith('.markdown')) {
+            await store.openFile(filePath)
+          }
+        }
+      }
+    })
+  } catch (err) {
+    console.warn('Register native drag drop event failed:', err)
+  }
   const modal = useModal()
   appWindow.onCloseRequested(async (event) => {
     event.preventDefault()
@@ -450,6 +478,7 @@ onUnmounted(() => {
   window.removeEventListener('keydown', onKeydown)
   window.removeEventListener('dragover', onGlobalDragOver)
   window.removeEventListener('drop', onGlobalDrop)
+  if (unlistenDragDrop) unlistenDragDrop()
   if (cleanupSync) cleanupSync()
   cleanupCloseRequested?.()
 })
