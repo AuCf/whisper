@@ -1,6 +1,6 @@
 <div align="center">
 
-<img src="docs/logo.png" alt="Whisper Logo" width="110" style="border-radius: 24px; box-shadow: 0 10px 25px rgba(0,0,0,0.08); margin-bottom: 12px;">
+<img src="docs/app-icon.png" alt="Whisper Logo" width="110" style="border-radius: 24px; box-shadow: 0 10px 25px rgba(0,0,0,0.08); margin-bottom: 12px;">
 
 # 📝 Whisper Markdown Editor
 
