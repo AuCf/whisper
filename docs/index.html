@@ -574,9 +574,6 @@
     <div>
       <img src="app-icon.png" alt="Whisper Logo" class="hero-logo-large">
     </div>
-    <div class="hero-badge">
-      <span>🎉 v1.0.0 正式版现已发布</span>
-    </div>
     <h1 class="hero-title">高颜值、极简沉浸的<br>桌面 Markdown 编辑器</h1>
     <p class="hero-subtitle">基于 Tauri 2.0 + Vue 3 构建。原生性能保障，支持思维导图大纲、全局搜索、80KB 智能截图粘贴与多主题极简排版。</p>
     
@@ -587,7 +584,7 @@
           <polyline points="7 10 12 15 17 10"/>
           <line x1="12" y1="15" x2="12" y2="3"/>
         </svg>
-        <span id="btn-text">免费下载 v1.0.0</span>
+        <span id="btn-text">免费下载 Whisper</span>
       </a>
       <a href="https://github.com/AuCf/whisper/releases" target="_blank" class="btn-secondary">
         查看 Releases 所有下载包
@@ -834,18 +831,36 @@
   </footer>
 
   <script>
-    // 智能下载按钮 OS 判定
-    (function() {
+    // 动态拉取 GitHub API 最新 Release 版本号与智能识别 OS 下载
+    (async function() {
       const ua = navigator.userAgent.toLowerCase();
       const btn = document.getElementById('main-download-btn');
       const text = document.getElementById('btn-text');
 
+      let latestVersion = 'v1.0.1';
+      try {
+        const res = await fetch('https://api.github.com/repos/AuCf/whisper/releases/latest');
+        if (res.ok) {
+          const data = await res.json();
+          if (data.tag_name) {
+            latestVersion = data.tag_name;
+          }
+        }
+      } catch (err) {
+        console.warn('Fetch latest version failed, using fallback:', err);
+      }
+
       if (ua.includes('win')) {
-        btn.href = 'https://github.com/AuCf/whisper/releases/download/v1.0.0/Whisper_1.0.0_x64-setup.exe';
-        text.innerText = '下载 Windows 版 (x64-setup.exe)';
+        const verNum = latestVersion.replace(/^v/, '');
+        btn.href = `https://github.com/AuCf/whisper/releases/download/${latestVersion}/Whisper_${verNum}_x64-setup.exe`;
+        text.innerText = `下载 Windows 版 (${latestVersion})`;
       } else if (ua.includes('mac')) {
-        btn.href = 'https://github.com/AuCf/whisper/releases/download/v1.0.0/Whisper_1.0.0_aarch64.dmg';
-        text.innerText = '下载 macOS 版 (.dmg)';
+        const verNum = latestVersion.replace(/^v/, '');
+        btn.href = `https://github.com/AuCf/whisper/releases/download/${latestVersion}/Whisper_${verNum}_aarch64.dmg`;
+        text.innerText = `下载 macOS 版 (${latestVersion})`;
+      } else {
+        btn.href = 'https://github.com/AuCf/whisper/releases/latest';
+        text.innerText = `免费下载 ${latestVersion}`;
       }
     })();
 
