@@ -1,5 +1,7 @@
 <div align="center">
 
+<img src="docs/logo.png" alt="Whisper Logo" width="110" style="border-radius: 24px; box-shadow: 0 10px 25px rgba(0,0,0,0.08); margin-bottom: 12px;">
+
 # 📝 Whisper Markdown Editor
 
 **一款基于 Tauri 2.0 + Vue 3 + CodeMirror 6 构建的高性能、极简美观的本地 Markdown 编辑与实时预览桌面应用**
