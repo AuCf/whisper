@@ -187,12 +187,22 @@
         </div>
       </div>
 
-      <!-- Check for updates -->
-      <button class="icon-btn" :class="{ spinning: isChecking }" data-tooltip="检查软件更新" @click="checkForUpdates(true)">
-        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21.5 2v6h-6"/><path d="M21.34 15.57a10 10 0 1 1-.57-8.38l5.67-5.67"/></svg>
-      </button>
+      <!-- Check for updates (only visible when update is available or checking) -->
+      <template v-if="hasUpdate || isChecking">
+        <button
+          class="icon-btn update-btn"
+          :class="{ spinning: isChecking, 'has-update': hasUpdate }"
+          :data-tooltip="hasUpdate ? `🎉 发现新版本 v${newVersion} (点击升级)` : '正在检查更新...'"
+          @click="checkForUpdates(true)"
+        >
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <path d="M21.5 2v6h-6"/><path d="M21.34 15.57a10 10 0 1 1-.57-8.38l5.67-5.67"/>
+          </svg>
+          <span v-if="hasUpdate" class="badge-dot"></span>
+        </button>
 
-      <div class="divider"></div>
+        <div class="divider"></div>
+      </template>
 
       <!-- Save -->
       <button class="toolbar-btn save-btn" data-tooltip="保存 (Ctrl+S)" @click="store.saveActiveFile()">
@@ -218,7 +228,7 @@ defineProps({
 const emit = defineEmits(['toggle-sync', 'insert', 'export'])
 
 const store = useEditorStore()
-const { checkForUpdates, isChecking } = useUpdater()
+const { checkForUpdates, isChecking, hasUpdate, newVersion } = useUpdater()
 const showThemeMenu = ref(false)
 const showStyleMenu = ref(false)
 const showExportMenu = ref(false)
@@ -422,6 +432,30 @@ function doExport(format) {
 }
 .dropdown-item.active {
   color: var(--accent);
+  font-weight: 500;
   background: var(--accent-muted);
+}
+
+.update-btn {
+  position: relative;
+}
+.update-btn.has-update {
+  color: var(--accent);
+}
+.badge-dot {
+  position: absolute;
+  top: 3px;
+  right: 3px;
+  width: 7px;
+  height: 7px;
+  background-color: #ffd070;
+  border-radius: 50%;
+  box-shadow: 0 0 0 2px rgba(255, 208, 112, 0.4);
+  animation: pulseBadge 1.8s infinite;
+}
+@keyframes pulseBadge {
+  0% { transform: scale(0.95); box-shadow: 0 0 0 0 rgba(255, 208, 112, 0.7); }
+  70% { transform: scale(1.15); box-shadow: 0 0 0 5px rgba(255, 208, 112, 0); }
+  100% { transform: scale(0.95); box-shadow: 0 0 0 0 rgba(255, 208, 112, 0); }
 }
 </style>

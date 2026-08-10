@@ -50,7 +50,15 @@
       </button>
 
       <span class="status-separator">|</span>
-      <span class="status-item status-brand">Whisper</span>
+      <span
+        class="status-item status-version"
+        :class="{ 'has-new-update': hasUpdate }"
+        :title="hasUpdate ? `点击升级至新版本 v${newVersion}` : `Whisper v${currentVersion}`"
+        @click="hasUpdate && checkForUpdates(true)"
+      >
+        <span class="version-tag">v{{ currentVersion }}</span>
+        <span v-if="hasUpdate" class="status-update-badge">● 🚀 v{{ newVersion }} 可用</span>
+      </span>
     </div>
   </div>
 </template>
@@ -58,8 +66,10 @@
 <script setup>
 import { computed } from 'vue'
 import { useEditorStore } from '../stores/editorStore.js'
+import { useUpdater } from '../composables/useUpdater.js'
 
 const store = useEditorStore()
+const { currentVersion, hasUpdate, newVersion, checkForUpdates } = useUpdater()
 
 const content = computed(() => store.activeContent || '')
 
@@ -131,6 +141,38 @@ const readingTime = computed(() => {
   font-weight: 600;
   opacity: 0.7;
   letter-spacing: 0.5px;
+}
+.status-version {
+  font-weight: 500;
+  opacity: 0.85;
+  letter-spacing: 0.3px;
+  user-select: none;
+}
+.status-version.has-new-update {
+  cursor: pointer;
+  opacity: 1;
+  background: rgba(255, 208, 112, 0.2);
+  padding: 1px 6px;
+  border-radius: 4px;
+  transition: all var(--transition);
+}
+.status-version.has-new-update:hover {
+  background: rgba(255, 208, 112, 0.35);
+}
+.version-tag {
+  font-family: var(--editor-font);
+}
+.status-update-badge {
+  color: #ffd070;
+  font-size: 11px;
+  font-weight: 600;
+  margin-left: 2px;
+  animation: pulseText 1.5s infinite;
+}
+@keyframes pulseText {
+  0% { opacity: 0.7; }
+  50% { opacity: 1; }
+  100% { opacity: 0.7; }
 }
 .status-btn {
   display: inline-flex;
