@@ -187,6 +187,11 @@
         </div>
       </div>
 
+      <!-- Check for updates -->
+      <button class="icon-btn" :class="{ spinning: isChecking }" data-tooltip="检查软件更新" @click="checkForUpdates(true)">
+        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21.5 2v6h-6"/><path d="M21.34 15.57a10 10 0 1 1-.57-8.38l5.67-5.67"/></svg>
+      </button>
+
       <div class="divider"></div>
 
       <!-- Save -->
@@ -204,6 +209,7 @@
 import { computed, ref } from 'vue'
 import { useEditorStore } from '../stores/editorStore.js'
 import { reinitMermaid } from '../composables/useMarkdown.js'
+import { useUpdater } from '../composables/useUpdater.js'
 import WindowControls from './WindowControls.vue'
 
 defineProps({
@@ -212,6 +218,7 @@ defineProps({
 const emit = defineEmits(['toggle-sync', 'insert', 'export'])
 
 const store = useEditorStore()
+const { checkForUpdates, isChecking } = useUpdater()
 const showThemeMenu = ref(false)
 const showStyleMenu = ref(false)
 const showExportMenu = ref(false)

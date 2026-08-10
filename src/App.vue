@@ -128,10 +128,12 @@ import StatusBar from './components/StatusBar.vue'
 import ModalDialog from './components/ModalDialog.vue'
 import GlobalSearch from './components/GlobalSearch.vue'
 import QuickOpenModal from './components/QuickOpenModal.vue'
+import { useUpdater } from './composables/useUpdater.js'
 
 const store = useEditorStore()
 const syncScroll = useSyncScroll()
 const { render: renderMarkdown } = useMarkdown()
+const { checkForUpdates } = useUpdater()
 const appWindow = getCurrentWindow()
 
 const modalEl = ref(null)
@@ -308,8 +310,15 @@ onMounted(async () => {
   // If no tabs session was restored, create welcome document
   if (!restored && store.tabs.length === 0) {
     store.newDocument()
-    // Populate with demo content
-    nextTick(() => {
+  }
+
+  // Silent auto check for updates on startup
+  setTimeout(() => {
+    checkForUpdates(false)
+  }, 3000)
+
+  // Populate with demo content
+  nextTick(() => {
       const tab = store.activeTab
       if (tab) {
         const demo = `# 欢迎使用 Whisper ✨
