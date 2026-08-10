@@ -3,21 +3,27 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Whisper — 高性能、极简美观的桌面 Markdown 编辑器</title>
-  <meta name="description" content="基于 Tauri 2.0 + Vue 3 构建的轻量级本地 Markdown 编辑与实时预览工具。支持交互式思维导图、全局搜索、多主题与智能图片粘贴。">
-  <link rel="icon" type="image/svg+xml" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%23388bfd' stroke-width='2'><path d='M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z'/><polyline points='14 2 14 8 20 8'/></svg>">
-  
+  <title>Whisper — 极简高颜值桌面 Markdown 编辑器</title>
+  <meta name="description" content="基于 Tauri 2.0 + Vue 3 构建的高性能本地 Markdown 编辑与实时预览桌面应用。支持交互式思维导图、全局搜索、独立双重排版与智能图片粘贴。">
+  <link rel="icon" type="image/svg+xml" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%232563eb' stroke-width='2'><path d='M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z'/><polyline points='14 2 14 8 20 8'/></svg>">
+
   <style>
     :root {
-      --bg: #0d1117;
-      --bg-card: #161b22;
-      --border: #30363d;
-      --border-subtle: #21262d;
-      --text: #e6edf3;
-      --text-muted: #8b949e;
-      --accent: #2979ff;
-      --accent-hover: #1c64db;
-      --accent-muted: rgba(41, 121, 255, 0.12);
+      --bg: #f8fafc;
+      --bg-card: #ffffff;
+      --border: #e2e8f0;
+      --border-hover: #cbd5e1;
+      --text: #0f172a;
+      --text-muted: #64748b;
+      --text-light: #94a3b8;
+      --accent: #2563eb;
+      --accent-hover: #1d4ed8;
+      --accent-light: #eff6ff;
+      --accent-glow: rgba(37, 99, 235, 0.12);
+      --shadow-sm: 0 1px 2px 0 rgba(0, 0, 0, 0.05);
+      --shadow-md: 0 4px 6px -1px rgba(0, 0, 0, 0.07), 0 2px 4px -2px rgba(0, 0, 0, 0.05);
+      --shadow-lg: 0 10px 15px -3px rgba(0, 0, 0, 0.08), 0 4px 6px -4px rgba(0, 0, 0, 0.04);
+      --shadow-hover: 0 20px 25px -5px rgba(37, 99, 235, 0.12), 0 8px 10px -6px rgba(37, 99, 235, 0.08);
       --font-code: "JetBrains Mono", ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace;
     }
 
@@ -26,35 +32,35 @@
     body {
       background-color: var(--bg);
       color: var(--text);
-      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
       line-height: 1.6;
       -webkit-font-smoothing: antialiased;
       overflow-x: hidden;
-      /* 网格背景设计 (Subtle Technical Grid Background) */
+      /* 亮色网格背景设计 (Subtle Light Grid Background) */
       background-image: 
-        linear-gradient(to right, rgba(255, 255, 255, 0.04) 1px, transparent 1px),
-        linear-gradient(to bottom, rgba(255, 255, 255, 0.04) 1px, transparent 1px);
-      background-size: 32px 32px;
+        linear-gradient(to right, rgba(0, 0, 0, 0.04) 1px, transparent 1px),
+        linear-gradient(to bottom, rgba(0, 0, 0, 0.04) 1px, transparent 1px);
+      background-size: 28px 28px;
       background-position: center top;
     }
 
     .container {
-      max-width: 1140px;
+      max-width: 1160px;
       margin: 0 auto;
       padding: 0 24px;
     }
 
     /* ── Header Navbar ──────────────────────────────────────────── */
     header {
-      border-bottom: 1px solid var(--border-subtle);
-      background: rgba(13, 17, 23, 0.85);
+      border-bottom: 1px solid rgba(226, 232, 240, 0.8);
+      background: rgba(255, 255, 255, 0.85);
       backdrop-filter: blur(12px);
       position: sticky;
       top: 0;
       z-index: 100;
     }
     .nav {
-      height: 64px;
+      height: 68px;
       display: flex;
       align-items: center;
       justify-content: space-between;
@@ -64,19 +70,20 @@
       align-items: center;
       gap: 10px;
       font-weight: 700;
-      font-size: 18px;
+      font-size: 19px;
       color: var(--text);
       text-decoration: none;
+      letter-spacing: -0.3px;
     }
     .brand-icon {
-      width: 28px;
-      height: 28px;
+      width: 30px;
+      height: 30px;
       color: var(--accent);
     }
     .nav-links {
       display: flex;
       align-items: center;
-      gap: 20px;
+      gap: 24px;
     }
     .nav-link {
       color: var(--text-muted);
@@ -85,11 +92,11 @@
       font-weight: 500;
       transition: color 0.2s;
     }
-    .nav-link:hover { color: var(--text); }
+    .nav-link:hover { color: var(--accent); }
 
     /* ── Hero Section ───────────────────────────────────────────── */
     .hero {
-      padding: 96px 0 64px;
+      padding: 88px 0 64px;
       text-align: center;
       position: relative;
     }
@@ -97,28 +104,31 @@
       display: inline-flex;
       align-items: center;
       gap: 8px;
-      padding: 4px 14px;
+      padding: 5px 16px;
       border-radius: 20px;
-      background: var(--accent-muted);
-      border: 1px solid rgba(41, 121, 255, 0.3);
-      color: #58a6ff;
+      background: var(--accent-light);
+      border: 1px solid rgba(37, 99, 235, 0.2);
+      color: var(--accent);
       font-size: 13px;
       font-weight: 600;
       margin-bottom: 24px;
+      box-shadow: var(--shadow-sm);
     }
     .hero-title {
-      font-size: 52px;
+      font-size: 54px;
       font-weight: 800;
-      letter-spacing: -1.2px;
+      letter-spacing: -1.5px;
       line-height: 1.15;
       margin-bottom: 20px;
+      color: #0f172a;
     }
     .hero-subtitle {
       font-size: 19px;
       color: var(--text-muted);
-      max-width: 680px;
+      max-width: 720px;
       margin: 0 auto 36px;
       font-weight: 400;
+      line-height: 1.6;
     }
     .hero-actions {
       display: flex;
@@ -131,158 +141,310 @@
       display: inline-flex;
       align-items: center;
       gap: 10px;
-      padding: 13px 28px;
+      padding: 14px 30px;
       background: var(--accent);
       color: #ffffff;
       font-size: 15px;
       font-weight: 600;
-      border-radius: 8px;
+      border-radius: 10px;
       text-decoration: none;
       transition: all 0.2s ease;
-      box-shadow: 0 4px 20px rgba(41, 121, 255, 0.3);
+      box-shadow: 0 4px 14px rgba(37, 99, 235, 0.35);
     }
     .btn-primary:hover {
       background: var(--accent-hover);
       transform: translateY(-2px);
-      box-shadow: 0 6px 24px rgba(41, 121, 255, 0.4);
+      box-shadow: 0 6px 20px rgba(37, 99, 235, 0.45);
     }
     .btn-secondary {
       display: inline-flex;
       align-items: center;
       gap: 8px;
-      padding: 13px 24px;
+      padding: 14px 26px;
       background: var(--bg-card);
       border: 1px solid var(--border);
       color: var(--text);
       font-size: 15px;
       font-weight: 500;
-      border-radius: 8px;
+      border-radius: 10px;
       text-decoration: none;
       transition: all 0.2s ease;
+      box-shadow: var(--shadow-sm);
     }
     .btn-secondary:hover {
-      background: #21262d;
-      border-color: #8b949e;
+      background: #f1f5f9;
+      border-color: #cbd5e1;
+      transform: translateY(-1px);
     }
 
-    /* ── Features Grid ──────────────────────────────────────────── */
+    /* ── App Mockup Window ──────────────────────────────────────── */
+    .app-preview {
+      margin: 56px auto 0;
+      max-width: 960px;
+      background: #ffffff;
+      border: 1px solid #cbd5e1;
+      border-radius: 14px;
+      box-shadow: 0 25px 50px -12px rgba(15, 23, 42, 0.15);
+      overflow: hidden;
+    }
+    .app-header {
+      height: 38px;
+      background: #f1f5f9;
+      border-bottom: 1px solid #e2e8f0;
+      display: flex;
+      align-items: center;
+      padding: 0 16px;
+      gap: 8px;
+    }
+    .app-dot {
+      width: 11px;
+      height: 11px;
+      border-radius: 50%;
+    }
+    .app-dot.red { background: #ef4444; }
+    .app-dot.yellow { background: #f59e0b; }
+    .app-dot.green { background: #10b981; }
+    .app-titlebar {
+      margin-left: auto;
+      margin-right: auto;
+      font-size: 12px;
+      color: var(--text-muted);
+      font-weight: 500;
+    }
+    .app-body-mockup {
+      display: grid;
+      grid-template-columns: 220px 1fr 1fr;
+      height: 420px;
+      background: #0f172a;
+      color: #e2e8f0;
+      text-align: left;
+      font-size: 13px;
+    }
+    .mock-sidebar {
+      background: #1e293b;
+      border-right: 1px solid #334155;
+      padding: 16px;
+      font-family: var(--font-code);
+      font-size: 12px;
+      color: #94a3b8;
+    }
+    .mock-tree-item {
+      padding: 4px 8px;
+      border-radius: 4px;
+      margin-bottom: 2px;
+      display: flex;
+      align-items: center;
+      gap: 6px;
+    }
+    .mock-tree-item.active {
+      background: rgba(37, 99, 235, 0.2);
+      color: #60a5fa;
+      font-weight: 500;
+    }
+    .mock-editor {
+      background: #0f172a;
+      border-right: 1px solid #1e293b;
+      padding: 20px;
+      font-family: var(--font-code);
+      line-height: 1.7;
+      color: #cbd5e1;
+      overflow: hidden;
+    }
+    .mock-editor .h1 { color: #60a5fa; font-weight: bold; font-size: 1.1em; }
+    .mock-editor .kw { color: #f43f5e; }
+    .mock-editor .str { color: #38bdf8; }
+    .mock-editor .cm { color: #64748b; font-style: italic; }
+    .mock-preview {
+      background: #0f172a;
+      padding: 20px;
+      line-height: 1.6;
+      color: #e2e8f0;
+    }
+    .mock-preview h1 {
+      font-size: 1.2em;
+      color: #f8fafc;
+      border-bottom: 1px solid #334155;
+      padding-bottom: 6px;
+      margin-bottom: 12px;
+    }
+
+    /* ── Features Grid (Enhanced Interactivity) ─────────────────── */
     .features {
-      padding: 64px 0 96px;
+      padding: 96px 0 110px;
     }
     .section-header {
       text-align: center;
-      margin-bottom: 56px;
+      margin-bottom: 64px;
+    }
+    .section-tag {
+      font-size: 13px;
+      font-weight: 700;
+      color: var(--accent);
+      text-transform: uppercase;
+      letter-spacing: 1px;
+      margin-bottom: 8px;
     }
     .section-title {
-      font-size: 32px;
-      font-weight: 700;
-      letter-spacing: -0.5px;
-      margin-bottom: 12px;
+      font-size: 36px;
+      font-weight: 800;
+      letter-spacing: -0.8px;
+      margin-bottom: 14px;
+      color: var(--text);
     }
     .section-desc {
-      font-size: 16px;
+      font-size: 17px;
       color: var(--text-muted);
     }
+
     .grid {
       display: grid;
-      grid-template-columns: repeat(auto-fit, minmax(320px, 1fr));
-      gap: 24px;
+      grid-template-columns: repeat(auto-fit, minmax(340px, 1fr));
+      gap: 28px;
     }
+
+    /* 高质感卡片设计与动效 */
     .card {
       background: var(--bg-card);
       border: 1px solid var(--border);
-      border-radius: 12px;
-      padding: 28px;
-      transition: all 0.2s ease;
+      border-radius: 16px;
+      padding: 32px;
+      transition: all 0.28s cubic-bezier(0.4, 0, 0.2, 1);
       position: relative;
+      overflow: hidden;
+      box-shadow: var(--shadow-sm);
+      display: flex;
+      flex-direction: column;
     }
+
+    .card::before {
+      content: "";
+      position: absolute;
+      top: 0;
+      left: 0;
+      right: 0;
+      height: 3px;
+      background: linear-gradient(90deg, var(--accent), #60a5fa);
+      opacity: 0;
+      transition: opacity 0.28s ease;
+    }
+
     .card:hover {
-      border-color: #58a6ff;
-      transform: translateY(-3px);
+      border-color: rgba(37, 99, 235, 0.4);
+      transform: translateY(-6px);
+      box-shadow: var(--shadow-hover);
     }
+
+    .card:hover::before {
+      opacity: 1;
+    }
+
+    .card-top {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      margin-bottom: 20px;
+    }
+
     .card-icon {
-      width: 40px;
-      height: 40px;
-      border-radius: 8px;
-      background: var(--accent-muted);
-      color: #58a6ff;
+      width: 48px;
+      height: 48px;
+      border-radius: 12px;
+      background: var(--accent-light);
+      color: var(--accent);
       display: flex;
       align-items: center;
       justify-content: center;
-      margin-bottom: 20px;
-    }
-    .card-title {
-      font-size: 18px;
-      font-weight: 600;
-      margin-bottom: 10px;
-    }
-    .card-desc {
-      font-size: 14px;
-      color: var(--text-muted);
-      line-height: 1.6;
+      transition: all 0.28s ease;
     }
 
-    /* ── Terminal / Command Showcase ────────────────────────────── */
+    .card:hover .card-icon {
+      background: var(--accent);
+      color: #ffffff;
+      transform: scale(1.05);
+    }
+
+    .card-pill {
+      font-size: 11.5px;
+      font-weight: 600;
+      padding: 3px 10px;
+      border-radius: 20px;
+      background: #f1f5f9;
+      color: var(--text-muted);
+    }
+
+    .card-title {
+      font-size: 19px;
+      font-weight: 700;
+      margin-bottom: 12px;
+      color: var(--text);
+      letter-spacing: -0.3px;
+    }
+
+    .card-desc {
+      font-size: 14.5px;
+      color: var(--text-muted);
+      line-height: 1.65;
+    }
+
+    /* ── Terminal Instruction Box ───────────────────────────────── */
     .mac-box {
-      margin: 48px auto;
-      max-width: 720px;
-      background: #161b22;
+      margin: 64px auto 0;
+      max-width: 800px;
+      background: #ffffff;
       border: 1px solid var(--border);
-      border-radius: 10px;
+      border-radius: 14px;
       overflow: hidden;
       text-align: left;
+      box-shadow: var(--shadow-md);
     }
     .mac-box-header {
-      padding: 10px 16px;
-      background: #0d1117;
-      border-bottom: 1px solid var(--border-subtle);
+      padding: 12px 20px;
+      background: #f8fafc;
+      border-bottom: 1px solid var(--border);
       display: flex;
       align-items: center;
       gap: 8px;
-      font-size: 12px;
+      font-size: 13px;
       color: var(--text-muted);
+      font-weight: 500;
     }
-    .mac-dot {
-      width: 10px;
-      height: 10px;
-      border-radius: 50%;
-    }
-    .mac-dot.red { background: #ff5f56; }
-    .mac-dot.yellow { background: #ffbd2e; }
-    .mac-dot.green { background: #27c93f; }
     .mac-box-body {
-      padding: 16px 20px;
+      padding: 20px 24px;
       font-family: var(--font-code);
-      font-size: 13.5px;
-      color: #7ee787;
+      font-size: 14px;
+      background: #0f172a;
+      color: #38bdf8;
       overflow-x: auto;
     }
-    .command-comment { color: var(--text-muted); display: block; margin-bottom: 6px; }
+    .command-comment { color: #64748b; display: block; margin-bottom: 8px; font-size: 13px; }
 
     /* ── Footer ─────────────────────────────────────────────────── */
     footer {
-      border-top: 1px solid var(--border-subtle);
-      padding: 40px 0;
+      border-top: 1px solid var(--border);
+      padding: 48px 0;
       text-align: center;
       color: var(--text-muted);
       font-size: 14px;
+      background: #ffffff;
     }
-    footer a { color: var(--text); text-decoration: none; }
+    footer a { color: var(--accent); text-decoration: none; font-weight: 500; }
     footer a:hover { text-decoration: underline; }
 
     @media (max-width: 768px) {
-      .hero-title { font-size: 36px; }
+      .hero-title { font-size: 38px; }
       .hero-subtitle { font-size: 16px; }
+      .app-body-mockup { grid-template-columns: 1fr; height: auto; }
+      .mock-sidebar, .mock-preview { display: none; }
     }
   </style>
 </head>
 <body>
 
-  <!-- Header -->
+  <!-- Header Navbar -->
   <header>
     <div class="container nav">
       <a href="#" class="brand">
-        <svg class="brand-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+        <svg class="brand-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2">
           <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/>
           <polyline points="14 2 14 8 20 8"/>
           <line x1="16" y1="13" x2="8" y2="13"/>
@@ -293,7 +455,7 @@
       <div class="nav-links">
         <a href="#features" class="nav-link">功能特性</a>
         <a href="#download" class="nav-link">全平台下载</a>
-        <a href="https://github.com/AuCf/whisper" target="_blank" class="nav-link">GitHub 源码</a>
+        <a href="https://github.com/AuCf/whisper" target="_blank" class="nav-link">GitHub 开源仓库</a>
       </div>
     </div>
   </header>
@@ -301,10 +463,10 @@
   <!-- Hero Section -->
   <section class="hero container">
     <div class="hero-badge">
-      <span>✨ v1.0.0 正式版现已发布</span>
+      <span>🎉 v1.0.0 正式版现已发布</span>
     </div>
     <h1 class="hero-title">高颜值、极简沉浸的<br>桌面 Markdown 编辑器</h1>
-    <p class="hero-subtitle">基于 Tauri 2.0 + Vue 3 构建。原生性能保障，支持思维导图大纲、全局模糊搜索、无感截图粘贴与多主题极简排版。</p>
+    <p class="hero-subtitle">基于 Tauri 2.0 + Vue 3 构建。原生性能保障，支持思维导图大纲、全局模糊搜索、80KB 智能截图粘贴与多主题极简排版。</p>
     
     <div class="hero-actions" id="download">
       <a id="main-download-btn" href="https://github.com/AuCf/whisper/releases/latest" class="btn-primary">
@@ -316,14 +478,47 @@
         <span id="btn-text">免费下载 v1.0.0</span>
       </a>
       <a href="https://github.com/AuCf/whisper/releases" target="_blank" class="btn-secondary">
-        查看所有版本包
+        查看 Releases 所有下载包
       </a>
+    </div>
+
+    <!-- App Window Mockup -->
+    <div class="app-preview">
+      <div class="app-header">
+        <span class="app-dot red"></span>
+        <span class="app-dot yellow"></span>
+        <span class="app-dot green"></span>
+        <span class="app-titlebar">Whisper — Welcome.md</span>
+      </div>
+      <div class="app-body-mockup">
+        <div class="mock-sidebar">
+          <div style="font-weight:600;margin-bottom:10px;color:#cbd5e1;">📁 工作区</div>
+          <div class="mock-tree-item active">📄 Welcome.md</div>
+          <div class="mock-tree-item">📄 Architecture.md</div>
+          <div class="mock-tree-item">📄 Notes.md</div>
+        </div>
+        <div class="mock-editor">
+          <div><span class="h1"># 欢迎使用 Whisper ✨</span></div>
+          <div style="margin-top:6px;"><span class="cm">// 极速、高颜值的 Markdown 编辑器</span></div>
+          <div style="margin-top:10px;"><span class="kw">function</span> <span class="str">initWhisper</span>() {</div>
+          <div style="padding-left:16px;"><span class="kw">return</span> <span class="str">"100% 离线优先 & 极简体验"</span></div>
+          <div>}</div>
+        </div>
+        <div class="mock-preview">
+          <h1>欢迎使用 Whisper ✨</h1>
+          <p style="font-size:13px;color:#94a3b8;margin-bottom:12px;">极速、高颜值的 Markdown 编辑器</p>
+          <div style="background:#1e293b;padding:8px 12px;border-radius:6px;font-size:12px;color:#38bdf8;">
+            💡 提示：按 F11 开启专注模式
+          </div>
+        </div>
+      </div>
     </div>
   </section>
 
-  <!-- Features Grid -->
+  <!-- Features Section -->
   <section class="features container" id="features">
     <div class="section-header">
+      <div class="section-tag">Powerful Features</div>
       <h2 class="section-title">专为沉浸写作而设计</h2>
       <p class="section-desc">拒绝繁复堆砌，把纯粹的写作体验还给每一个创作者</p>
     </div>
@@ -331,36 +526,45 @@
     <div class="grid">
       <!-- Card 1 -->
       <div class="card">
-        <div class="card-icon">
-          <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-            <circle cx="12" cy="12" r="3"/>
-            <path d="M12 9V3M12 15v6M15 12h6M9 12H3"/>
-          </svg>
+        <div class="card-top">
+          <div class="card-icon">
+            <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <circle cx="12" cy="12" r="3"/>
+              <path d="M12 9V3M12 15v6M15 12h6M9 12H3"/>
+            </svg>
+          </div>
+          <span class="card-pill">Marked AST 驱动</span>
         </div>
         <h3 class="card-title">交互式思维导图模式</h3>
-        <p class="card-desc">基于 Marked AST 语法树生成交互式标题导图。支持自由平移缩放，点击节点即可平滑滚动跳转至对应文本段落。</p>
+        <p class="card-desc">基于语法树动态提取标题大纲，支持自由缩放平移。点击导图节点，自动退出并平滑滚动高亮定位至对应文本。</p>
       </div>
 
       <!-- Card 2 -->
       <div class="card">
-        <div class="card-icon">
-          <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-            <circle cx="11" cy="11" r="8"/>
-            <line x1="21" y1="21" x2="16.65" y2="16.65"/>
-          </svg>
+        <div class="card-top">
+          <div class="card-icon">
+            <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <circle cx="11" cy="11" r="8"/>
+              <line x1="21" y1="21" x2="16.65" y2="16.65"/>
+            </svg>
+          </div>
+          <span class="card-pill">Rust 原生加速</span>
         </div>
-        <h3 class="card-title">工作区全局精准搜索</h3>
-        <p class="card-desc">快捷键 Ctrl+Shift+F 触发，Rust 后端快速扫描工作区文件与内容行上下文，支持快捷键模糊查词定位。</p>
+        <h3 class="card-title">全局工作区精准搜索</h3>
+        <p class="card-desc">快捷键 Ctrl+Shift+F 开启，Rust 后端快速扫描工作区文件与匹配行上下文，支持模糊查词与一键行高亮定位。</p>
       </div>
 
       <!-- Card 3 -->
       <div class="card">
-        <div class="card-icon">
-          <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-            <rect x="3" y="3" width="18" height="18" rx="2" ry="2"/>
-            <circle cx="8.5" cy="8.5" r="1.5"/>
-            <polyline points="21 15 16 10 5 21"/>
-          </svg>
+        <div class="card-top">
+          <div class="card-icon">
+            <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <rect x="3" y="3" width="18" height="18" rx="2" ry="2"/>
+              <circle cx="8.5" cy="8.5" r="1.5"/>
+              <polyline points="21 15 16 10 5 21"/>
+            </svg>
+          </div>
+          <span class="card-pill">80KB 阈值切分</span>
         </div>
         <h3 class="card-title">80KB 智能截图粘贴</h3>
         <p class="card-desc">按 80KB 临界值智能切分：小截图直接转 Base64 嵌入（零多余文件夹），大图自动收纳至存储库，保持目录绝对干净。</p>
@@ -368,22 +572,28 @@
 
       <!-- Card 4 -->
       <div class="card">
-        <div class="card-icon">
-          <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-            <path d="M12 2a10 10 0 1 0 10 10H12V2z"/>
-          </svg>
+        <div class="card-top">
+          <div class="card-icon">
+            <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <path d="M12 2a10 10 0 1 0 10 10H12V2z"/>
+            </svg>
+          </div>
+          <span class="card-pill">多风格预设</span>
         </div>
         <h3 class="card-title">双重排版与消光配色</h3>
-        <p class="card-desc">内置 GitHub Standard 与 VitePress Tech 双重渲染效果。提供消光 Dark、GitHub Light 与 Solarized 三大精致主题。</p>
+        <p class="card-desc">内置 GitHub Standard 与 VitePress Tech 双重排版效果。提供消光 Dark、GitHub Light 与 Solarized 三大精致主题。</p>
       </div>
 
       <!-- Card 5 -->
       <div class="card">
-        <div class="card-icon">
-          <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-            <path d="M21.5 2v6h-6"/>
-            <path d="M21.34 15.57a10 10 0 1 1-.57-8.38l5.67-5.67"/>
-          </svg>
+        <div class="card-top">
+          <div class="card-icon">
+            <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <path d="M21.5 2v6h-6"/>
+              <path d="M21.34 15.57a10 10 0 1 1-.57-8.38l5.67-5.67"/>
+            </svg>
+          </div>
+          <span class="card-pill">Tauri 2.0 增量包</span>
         </div>
         <h3 class="card-title">全自动增量平滑升级</h3>
         <p class="card-desc">完美接入 Tauri 2.0 签名更新机制。启动无感检测，检测到新版本时工具栏自动浮现脉冲小黄点，一键更新重启。</p>
@@ -391,24 +601,24 @@
 
       <!-- Card 6 -->
       <div class="card">
-        <div class="card-icon">
-          <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-            <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/>
-            <polyline points="14 2 14 8 20 8"/>
-          </svg>
+        <div class="card-top">
+          <div class="card-icon">
+            <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/>
+              <polyline points="14 2 14 8 20 8"/>
+            </svg>
+          </div>
+          <span class="card-pill">会话持久化</span>
         </div>
         <h3 class="card-title">标签页会话持久还原</h3>
         <p class="card-desc">应用关闭或重新启动时，自动还原上次打开的所有文件标签页状态，配合全局阅读状态栏，随时记录写作节奏。</p>
       </div>
     </div>
 
-    <!-- macOS Gatekeeper Instruction Box -->
+    <!-- macOS Terminal Instruction Box -->
     <div class="mac-box">
       <div class="mac-box-header">
-        <span class="mac-dot red"></span>
-        <span class="mac-dot yellow"></span>
-        <span class="mac-dot green"></span>
-        <span style="margin-left:8px;">Terminal — macOS 未签名保护消除指令</span>
+        <span>Terminal — macOS 未签名保护消除指令</span>
       </div>
       <div class="mac-box-body">
         <span class="command-comment"># 若 macOS 首次打开提示“应用已损坏，打不开”，请在终端运行：</span>
@@ -421,8 +631,8 @@
   <footer>
     <div class="container">
       <p>Whisper Markdown Editor &copy; 2026. 基于 <a href="https://github.com/AuCf/whisper/blob/master/LICENSE" target="_blank">MIT 协议</a> 开源。</p>
-      <p style="margin-top: 8px; font-size: 13px;">
-        <a href="https://github.com/AuCf/whisper" target="_blank">GitHub 仓库</a> &bull; 
+      <p style="margin-top: 10px; font-size: 13.5px;">
+        <a href="https://github.com/AuCf/whisper" target="_blank">GitHub 源码</a> &bull; 
         <a href="https://github.com/AuCf/whisper/releases" target="_blank">Releases 发布页面</a>
       </p>
     </div>
