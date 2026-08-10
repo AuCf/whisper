@@ -81,6 +81,17 @@ const mermaidThemes = {
   },
 }
 
+function cleanupMermaidErrorArtifacts() {
+  if (typeof document === 'undefined') return
+  const markers = document.querySelectorAll(
+    'body > div > svg .error-icon, body > div > svg .error-text'
+  )
+  for (const marker of markers) {
+    const host = marker.closest('body > div')
+    if (host?.parentElement === document.body) host.remove()
+  }
+}
+
 /**
  * Initialize or reinitialize Mermaid with theme-appropriate settings.
  * @param {string} themeName - 'dark' | 'light' | 'solarized'
@@ -90,10 +101,12 @@ export function reinitMermaid(themeName = 'dark') {
   try {
     mermaid.initialize({
       startOnLoad: false,
+      suppressErrorRendering: true,
       ...config,
       fontFamily: 'Inter, -apple-system, sans-serif',
       fontSize: 14,
     })
+    cleanupMermaidErrorArtifacts()
   } catch (e) {
     console.warn('Mermaid init warning:', e)
   }
@@ -206,6 +219,7 @@ async function renderMermaid(container) {
       const { svg } = await mermaid.render(id + '-svg', code)
       el.innerHTML = svg
     } catch (err) {
+      cleanupMermaidErrorArtifacts()
       el.innerHTML = `<div style="color:var(--red);font-size:12px;padding:12px;">Mermaid error: ${err.message}</div>`
     }
   }

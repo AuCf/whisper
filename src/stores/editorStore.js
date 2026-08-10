@@ -1,5 +1,5 @@
 import { defineStore } from 'pinia'
-import { ref, computed } from 'vue'
+import { ref, computed, watch } from 'vue'
 import { invoke } from '@tauri-apps/api/core'
 import { getCurrentWindow } from '@tauri-apps/api/window'
 import { save } from '@tauri-apps/plugin-dialog'
@@ -7,6 +7,7 @@ import { save } from '@tauri-apps/plugin-dialog'
 const WORKSPACES_KEY = 'whisper-workspaces'
 const LEGACY_WORKSPACE_KEY = 'whisper-last-workspace'
 const TABS_SESSION_KEY = 'whisper-tabs-session'
+const VIEW_STATE_KEY = 'whisper-view-state'
 
 export const useEditorStore = defineStore('editor', () => {
   // ── Files & Workspace ──────────────────────────────────────
@@ -37,6 +38,61 @@ export const useEditorStore = defineStore('editor', () => {
     workspaces.value.find(workspace => workspace.path === workspacePath.value) ?? null
   )
   const fileTree = computed(() => activeWorkspace.value?.tree ?? [])
+
+  // ── View state persistence ─────────────────────────────────
+  const persistedViewRefs = {
+    showSidebar,
+    showOutline,
+    focusMode,
+    showPreview,
+    showEditor,
+    sidebarMini,
+    showMindmap,
+  }
+  let restoringViewState = false
+
+  function persistViewState() {
+    if (restoringViewState) return
+    try {
+      const state = Object.fromEntries(
+        Object.entries(persistedViewRefs).map(([key, value]) => [key, value.value])
+      )
+      localStorage.setItem(VIEW_STATE_KEY, JSON.stringify(state))
+    } catch (err) {
+      console.warn('保存视图状态失败:', err)
+    }
+  }
+
+  function initViewState() {
+    let saved
+    try {
+      saved = JSON.parse(localStorage.getItem(VIEW_STATE_KEY) || 'null')
+    } catch (err) {
+      console.warn('读取视图状态失败:', err)
+    }
+
+    if (!saved || typeof saved !== 'object') {
+      persistViewState()
+      return
+    }
+
+    restoringViewState = true
+    for (const [key, target] of Object.entries(persistedViewRefs)) {
+      if (typeof saved[key] === 'boolean') target.value = saved[key]
+    }
+    if (!showEditor.value && !showPreview.value) {
+      showEditor.value = true
+      showPreview.value = true
+    }
+    restoringViewState = false
+    persistViewState()
+  }
+
+  watch(
+    Object.values(persistedViewRefs),
+    persistViewState,
+    { flush: 'sync' }
+  )
 
   // ── Tab management ─────────────────────────────────────────
   function createTabId() {
@@ -545,6 +601,7 @@ export const useEditorStore = defineStore('editor', () => {
     renamePath, openWorkspace, restoreWorkspaces, refreshFileTree, refreshAllWorkspaces,
     setActiveWorkspace, setWorkspaceExpanded, setWorkspaceRemark, removeWorkspace, newDocument, scheduleAutoSave,
     // Session & Theme
-    initTheme, setTheme, initPreviewStyle, setPreviewStyle, toggleSidebarMini, restoreTabsSession, persistTabsSession,
+    initTheme, setTheme, initPreviewStyle, setPreviewStyle, initViewState, persistViewState,
+    toggleSidebarMini, restoreTabsSession, persistTabsSession,
   }
 })

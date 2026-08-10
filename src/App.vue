@@ -283,6 +283,7 @@ onMounted(async () => {
   registerModal(modalEl.value)
   store.initTheme()
   store.initPreviewStyle()
+  store.initViewState()
   await store.restoreWorkspaces()
   const restored = await store.restoreTabsSession()
   window.addEventListener('keydown', onKeydown)
