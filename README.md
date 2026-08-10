@@ -5,6 +5,9 @@
 **一款基于 Tauri 2.0 + Vue 3 + CodeMirror 6 构建的高性能、极简美观的本地 Markdown 编辑与实时预览桌面应用**
 
 [![Release](https://img.shields.io/github/v/release/AuCf/whisper?color=0969da&style=flat-shadow)](https://github.com/AuCf/whisper/releases)
+[![Stars](https://img.shields.io/github/stars/AuCf/whisper?style=flat-shadow&logo=github)](https://github.com/AuCf/whisper/stargazers)
+[![Downloads](https://img.shields.io/github/downloads/AuCf/whisper/total?style=flat-shadow&logo=github&color=0969da)](https://github.com/AuCf/whisper/releases)
+[![Forks](https://img.shields.io/github/forks/AuCf/whisper?style=flat-shadow&logo=github)](https://github.com/AuCf/whisper/network/members)
 [![Tauri](https://img.shields.io/badge/Tauri-2.0-blue?logo=tauri&style=flat-shadow)](https://tauri.app/)
 [![Vue 3](https://img.shields.io/badge/Vue-3.4-brightgreen?logo=vuedotjs&style=flat-shadow)](https://vuejs.org/)
 [![License](https://img.shields.io/badge/license-MIT-green?style=flat-shadow)](LICENSE)
@@ -70,6 +73,17 @@
 
 - **Windows**: `Whisper_x64-setup.exe` (NSIS 安装包) 或 `Whisper_x64.msi`
 - **macOS**: `Whisper_aarch64.dmg` (Apple Silicon M 系列芯片) / `Whisper_x64.dmg` (Intel 芯片)
+
+### 🍎 macOS 未签名应用无法打开提示修复
+
+由于 macOS Gatekeeper 安全机制，未经过 Apple 开发者证书签名的开源应用在首次运行时可能会提示 **“已损坏，无法打开”** 或 **“无法验证开发者”**。
+
+在 macOS 终端 (Terminal) 中运行以下命令清除隔离属性即可正常打开：
+
+```bash
+sudo xattr -rd com.apple.quarantine /Applications/Whisper.app
+```
+*(注：如果将 `Whisper.app` 放置于其他自定义文件夹，请替换为对应实际路径)*
 
 ---
 
