@@ -2,10 +2,7 @@
   <div class="toolbar" :class="{ hidden: store.focusMode }">
     <div class="titlebar-brand" data-tauri-drag-region>
       <span class="brand-mark" data-tauri-drag-region aria-hidden="true">
-        <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8">
-          <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/>
-          <path d="M14 2v6h6M8 13h8M8 17h5"/>
-        </svg>
+        <img src="/app-icon.png" alt="" draggable="false" />
       </span>
       <span class="brand-name" data-tauri-drag-region>Whisper</span>
       <span class="titlebar-separator" data-tauri-drag-region>/</span>
@@ -299,8 +296,12 @@ function doExport(format) {
 .brand-mark {
   display: flex;
   flex-shrink: 0;
-  color: var(--accent);
+  width: 18px;
+  height: 18px;
+  align-items: center;
+  justify-content: center;
 }
+.brand-mark img { width: 18px; height: 18px; object-fit: contain; }
 .brand-name {
   flex-shrink: 0;
   color: var(--text-primary);

@@ -116,6 +116,7 @@ import { open } from '@tauri-apps/plugin-dialog'
 import { useEditorStore } from './stores/editorStore.js'
 import { useSyncScroll } from './composables/useSyncScroll.js'
 import { useMarkdown } from './composables/useMarkdown.js'
+import { applyWindowIcon } from './composables/useWindowIcon.js'
 import { exportAsHTML, exportAsPDF, exportAsPNG } from './composables/useExport.js'
 import { registerModal, useModal } from './composables/useModal.js'
 import Toolbar from './components/Toolbar.vue'
@@ -309,6 +310,7 @@ async function onGlobalDrop(e) {
 
 onMounted(async () => {
   registerModal(modalEl.value)
+  applyWindowIcon().catch(err => console.warn('设置窗口图标失败:', err))
   store.initTheme()
   store.initPreviewStyle()
   store.initViewState()
