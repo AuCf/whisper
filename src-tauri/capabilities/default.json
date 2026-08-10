@@ -16,6 +16,6 @@
     "dialog:default",
     "fs:default",
     "updater:default",
-    "process:allow-relaunch"
+    "process:allow-restart"
   ]
 }
