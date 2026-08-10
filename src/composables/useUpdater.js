@@ -78,9 +78,14 @@ export function useUpdater() {
       isChecking.value = false
       console.error('Check update failed:', err)
       if (interactive) {
+        const rawErr = String(err?.message || err || '')
+        let friendlyMsg = rawErr
+        if (rawErr.includes('Could not fetch a valid release JSON') || rawErr.includes('404')) {
+          friendlyMsg = 'GitHub Releases 线上暂未检索到有效的更新签名清单 (latest.json)。\n\n【排查说明】\n1. 请确认 GitHub Actions 构建任务已成功跑完；\n2. 请确认 Releases 页面中已发布包含 latest.json 的 Release 版本。'
+        }
         await modal.confirm({
-          title: '⚠️ 检查更新错误',
-          message: `无法连接到更新服务器或配置文件出错: ${err?.message || err}`,
+          title: '⚠️ 检查更新提示',
+          message: friendlyMsg,
           confirmText: '知道了',
           cancelText: '关闭'
         })

@@ -20,8 +20,8 @@
         </div>
 
         <div class="modal-footer">
-          <button class="modal-btn cancel" @click="onCancel">取消</button>
-          <button class="modal-btn primary" @click="onConfirm">确定</button>
+          <button class="modal-btn cancel" @click="onCancel">{{ options.cancelText || '取消' }}</button>
+          <button class="modal-btn primary" @click="onConfirm">{{ options.confirmText || '确定' }}</button>
         </div>
       </div>
     </div>
@@ -40,13 +40,35 @@ const options = ref({
   message: '',
   defaultValue: '',
   placeholder: '',
+  confirmText: '确定',
+  cancelText: '取消'
 })
 
 let resolvePromise = null
 
-function showPrompt({ title, message = '', defaultValue = '', placeholder = '' }) {
-  options.value = { type: 'prompt', title, message, defaultValue, placeholder }
-  inputValue.value = defaultValue
+function showPrompt(titleOrOpts, message = '', defaultValue = '', placeholder = '') {
+  if (typeof titleOrOpts === 'object' && titleOrOpts !== null) {
+    options.value = {
+      type: 'prompt',
+      title: titleOrOpts.title || '',
+      message: titleOrOpts.message || '',
+      defaultValue: titleOrOpts.defaultValue || '',
+      placeholder: titleOrOpts.placeholder || '',
+      confirmText: titleOrOpts.confirmText || '确定',
+      cancelText: titleOrOpts.cancelText || '取消'
+    }
+  } else {
+    options.value = {
+      type: 'prompt',
+      title: titleOrOpts,
+      message,
+      defaultValue,
+      placeholder,
+      confirmText: '确定',
+      cancelText: '取消'
+    }
+  }
+  inputValue.value = options.value.defaultValue
   isOpen.value = true
 
   nextTick(() => {
@@ -61,8 +83,24 @@ function showPrompt({ title, message = '', defaultValue = '', placeholder = '' }
   })
 }
 
-function showConfirm({ title, message = '' }) {
-  options.value = { type: 'confirm', title, message }
+function showConfirm(titleOrOpts, message = '') {
+  if (typeof titleOrOpts === 'object' && titleOrOpts !== null) {
+    options.value = {
+      type: 'confirm',
+      title: titleOrOpts.title || '',
+      message: titleOrOpts.message || '',
+      confirmText: titleOrOpts.confirmText || '确定',
+      cancelText: titleOrOpts.cancelText || '取消'
+    }
+  } else {
+    options.value = {
+      type: 'confirm',
+      title: titleOrOpts,
+      message,
+      confirmText: '确定',
+      cancelText: '取消'
+    }
+  }
   isOpen.value = true
 
   return new Promise(resolve => {

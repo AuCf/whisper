@@ -7,20 +7,23 @@ export function registerModal(refInstance) {
 }
 
 export function useModal() {
-  async function prompt(title, defaultValue = '', placeholder = '') {
+  async function prompt(titleOrOpts, defaultValue = '', placeholder = '') {
     if (modalRef.value) {
-      return modalRef.value.showPrompt({ title, defaultValue, placeholder })
+      return modalRef.value.showPrompt(titleOrOpts, defaultValue, placeholder)
     }
-    // Fallback if not registered
-    return window.prompt(title, defaultValue)
+    const title = typeof titleOrOpts === 'object' ? titleOrOpts.title : titleOrOpts
+    const def = typeof titleOrOpts === 'object' ? titleOrOpts.defaultValue : defaultValue
+    return window.prompt(title, def)
   }
 
-  async function confirm(title, message = '') {
+  async function confirm(titleOrOpts, message = '') {
     if (modalRef.value) {
-      return modalRef.value.showConfirm({ title, message })
+      return modalRef.value.showConfirm(titleOrOpts, message)
     }
-    // Fallback if not registered
-    return window.confirm(message ? `${title}\n${message}` : title)
+    if (typeof titleOrOpts === 'object' && titleOrOpts !== null) {
+      return window.confirm(titleOrOpts.message ? `${titleOrOpts.title}\n${titleOrOpts.message}` : titleOrOpts.title)
+    }
+    return window.confirm(message ? `${titleOrOpts}\n${message}` : titleOrOpts)
   }
 
   return { prompt, confirm }
