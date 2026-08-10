@@ -120,6 +120,31 @@
       margin: 0 auto 36px;
       font-weight: 400;
     }
+    .hero-metrics {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 12px 18px;
+      flex-wrap: wrap;
+      margin-top: 36px;
+    }
+    .metric-pill {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      padding: 7px 16px;
+      background: #ffffff;
+      border: 1px solid var(--border);
+      border-radius: 30px;
+      font-size: 13.5px;
+      color: var(--text);
+      box-shadow: 0 1px 3px rgba(0, 0, 0, 0.03);
+    }
+    .metric-pill strong {
+      color: var(--accent);
+      font-weight: 700;
+    }
+
     .hero-actions {
       display: flex;
       align-items: center;
@@ -554,6 +579,22 @@
       <a href="https://github.com/AuCf/whisper/releases" target="_blank" class="btn-secondary">
         查看 Releases 所有下载包
       </a>
+    </div>
+
+    <!-- Key Metrics Highlights (No competitor comparison, pure objective performance & licensing) -->
+    <div class="hero-metrics">
+      <div class="metric-pill">
+        <span>📦 安装包仅 <strong>~7 MB</strong></span>
+      </div>
+      <div class="metric-pill">
+        <span>⚡ 运行内存仅 <strong>~40 MB</strong></span>
+      </div>
+      <div class="metric-pill">
+        <span>🎁 <strong>100% 开源免费</strong> (MIT)</span>
+      </div>
+      <div class="metric-pill">
+        <span>🔒 <strong>100% 离线优先</strong> 隐私安全</span>
+      </div>
     </div>
 
     <!-- App Window Mockup -->
