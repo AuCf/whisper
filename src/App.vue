@@ -310,15 +310,8 @@ onMounted(async () => {
   // If no tabs session was restored, create welcome document
   if (!restored && store.tabs.length === 0) {
     store.newDocument()
-  }
-
-  // Silent auto check for updates on startup
-  setTimeout(() => {
-    checkForUpdates(false)
-  }, 3000)
-
-  // Populate with demo content
-  nextTick(() => {
+    // Populate with demo content
+    nextTick(() => {
       const tab = store.activeTab
       if (tab) {
         const demo = `# 欢迎使用 Whisper ✨
@@ -430,6 +423,11 @@ graph LR
       }
     })
   }
+
+  // Silent auto check for updates on startup
+  setTimeout(() => {
+    checkForUpdates(false)
+  }, 3000)
 })
 
 onUnmounted(() => {
