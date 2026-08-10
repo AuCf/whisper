@@ -88,17 +88,32 @@ export async function saveClipboardImage(blob, view, filePath) {
       const reader = new FileReader()
       reader.onload = () => {
         const base64Url = reader.result
-        const imageMarkdown = `![image](${base64Url})`
+        const docText = view.state.doc.toString()
+        const matches = docText.match(/\[img-\d+\]/g) || []
+        let maxId = 0
+        matches.forEach(m => {
+          const num = parseInt(m.replace(/\D/g, ''), 10)
+          if (!isNaN(num) && num > maxId) maxId = num
+        })
+        const refId = `img-${maxId + 1}`
+
+        const refLinkText = `![image][${refId}]`
+        const docLength = view.state.doc.length
+        const needsNewlineBefore = docLength > 0 && !docText.endsWith('\n\n') ? (docText.endsWith('\n') ? '\n' : '\n\n') : ''
+        const refDefinitionText = `${needsNewlineBefore}[${refId}]: ${base64Url}\n`
 
         view.dispatch({
-          changes: { from: selection.from, to: selection.to, insert: imageMarkdown },
-          selection: { anchor: selection.from + imageMarkdown.length },
+          changes: [
+            { from: selection.from, to: selection.to, insert: refLinkText },
+            { from: docLength, to: docLength, insert: refDefinitionText }
+          ],
+          selection: { anchor: selection.from + refLinkText.length },
           scrollIntoView: true,
         })
         resolve(true)
       }
       reader.onerror = (err) => {
-        console.error('Base64 read failed:', err)
+        console.error('Failed to read image as Base64:', err)
         resolve(false)
       }
       reader.readAsDataURL(blob)
