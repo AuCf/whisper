@@ -1,4 +1,5 @@
 use serde::{Deserialize, Serialize};
+use std::env;
 use std::fs;
 use std::fs::OpenOptions;
 use std::path::Path;
@@ -10,6 +11,31 @@ pub struct FileEntry {
     pub path: String,
     pub is_dir: bool,
     pub children: Option<Vec<FileEntry>>,
+}
+
+fn is_supported_document(path: &Path) -> bool {
+    path.is_file()
+        && path
+            .extension()
+            .and_then(|extension| extension.to_str())
+            .map(|extension| {
+                matches!(
+                    extension.to_ascii_lowercase().as_str(),
+                    "md" | "markdown" | "mdx"
+                )
+            })
+            .unwrap_or(false)
+}
+
+/// Return supported documents passed by the operating system when launching Whisper.
+#[command]
+pub fn get_startup_files() -> Vec<String> {
+    env::args_os()
+        .skip(1)
+        .map(std::path::PathBuf::from)
+        .filter(|path| is_supported_document(path))
+        .map(|path| path.to_string_lossy().into_owned())
+        .collect()
 }
 
 /// Read a file's content as a UTF-8 string

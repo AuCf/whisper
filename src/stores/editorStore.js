@@ -188,9 +188,10 @@ export const useEditorStore = defineStore('editor', () => {
     try {
       const content = await invoke('read_file', { path })
       const name = path.split(/[\\/]/).pop()
-      openTab(path, name, content)
+      return openTab(path, name, content)
     } catch (err) {
       notifyError('打开文件', err)
+      return false
     }
   }
 

@@ -275,3 +275,12 @@ input:focus, textarea:focus {
 
 .fade-in { animation: fadeIn var(--transition-slow) both; }
 .slide-in-left { animation: slideInLeft var(--transition-slow) both; }
+
+@media (prefers-reduced-motion: reduce) {
+  *, *::before, *::after {
+    scroll-behavior: auto !important;
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+  }
+}

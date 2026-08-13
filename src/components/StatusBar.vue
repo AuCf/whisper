@@ -16,11 +16,11 @@
         {{ wordCount }} 字
       </span>
       <span class="status-separator">|</span>
-      <span class="status-item" title="预计阅读时间">⏱️ {{ readingTime }}</span>
+      <span class="status-item status-secondary" title="预计阅读时间">{{ readingTime }}阅读</span>
       <span class="status-separator">|</span>
-      <span class="status-item" title="字符数">{{ charCount }} 字符</span>
+      <span class="status-item status-detail" title="字符数">{{ charCount }} 字符</span>
       <span class="status-separator">|</span>
-      <span class="status-item" title="行数">{{ lineCount }} 行</span>
+      <span class="status-item status-detail" title="行数">{{ lineCount }} 行</span>
       <span class="status-separator">|</span>
       <span class="status-item" title="光标位置">行 {{ store.cursorLine }}，列 {{ store.cursorColumn }}</span>
       <span class="status-separator">|</span>
@@ -29,7 +29,7 @@
 
       <!-- Toggle outline -->
       <button
-        class="status-btn"
+        class="status-btn status-outline-toggle"
         :class="{ active: store.showOutline }"
         @click="store.showOutline = !store.showOutline"
         title="大纲"
@@ -103,11 +103,12 @@ const readingTime = computed(() => {
   align-items: center;
   justify-content: space-between;
   height: var(--statusbar-height);
-  background: var(--accent);
+  background: var(--statusbar-bg);
+  border-top: 1px solid var(--border-subtle);
   padding: 0 10px;
   flex-shrink: 0;
   font-size: 11.5px;
-  color: rgba(255,255,255,0.85);
+  color: var(--text-muted);
   transition: height var(--transition-slow), opacity var(--transition-slow);
 }
 .status-bar.hidden {
@@ -121,6 +122,11 @@ const readingTime = computed(() => {
   align-items: center;
   gap: 6px;
 }
+.status-group:first-child {
+  min-width: 0;
+  flex: 1;
+}
+.status-group:last-child { flex-shrink: 0; }
 .status-item {
   display: flex;
   align-items: center;
@@ -130,13 +136,14 @@ const readingTime = computed(() => {
 }
 .status-filename {
   font-weight: 500;
-  opacity: 1;
+  color: var(--text-secondary);
+  opacity: 0.9;
   max-width: 420px;
   overflow: hidden;
   text-overflow: ellipsis;
 }
-.status-dirty { color: #ffd070; font-size: 14px; line-height: 1; }
-.status-separator { opacity: 0.35; }
+.status-dirty { color: var(--yellow); font-size: 12px; line-height: 1; }
+.status-separator { color: var(--border); opacity: 0.8; }
 .status-brand {
   font-weight: 600;
   opacity: 0.7;
@@ -151,28 +158,23 @@ const readingTime = computed(() => {
 .status-version.has-new-update {
   cursor: pointer;
   opacity: 1;
-  background: rgba(255, 208, 112, 0.2);
+  color: var(--accent);
+  background: var(--accent-muted);
   padding: 1px 6px;
   border-radius: 4px;
-  transition: all var(--transition);
+  transition: background var(--transition), color var(--transition);
 }
 .status-version.has-new-update:hover {
-  background: rgba(255, 208, 112, 0.35);
+  background: var(--bg-hover);
 }
 .version-tag {
   font-family: var(--editor-font);
 }
 .status-update-badge {
-  color: #ffd070;
+  color: var(--accent);
   font-size: 11px;
   font-weight: 600;
   margin-left: 2px;
-  animation: pulseText 1.5s infinite;
-}
-@keyframes pulseText {
-  0% { opacity: 0.7; }
-  50% { opacity: 1; }
-  100% { opacity: 0.7; }
 }
 .status-btn {
   display: inline-flex;
@@ -181,12 +183,31 @@ const readingTime = computed(() => {
   padding: 1px 6px;
   border-radius: 3px;
   font-size: 11.5px;
-  color: rgba(255,255,255,0.8);
+  color: var(--text-muted);
   background: none;
   border: none;
   cursor: pointer;
   transition: background var(--transition);
 }
-.status-btn:hover { background: rgba(255,255,255,0.15); }
-.status-btn.active { background: rgba(255,255,255,0.2); color: white; }
+.status-btn:hover { background: var(--bg-hover); color: var(--text-secondary); }
+.status-btn.active { background: var(--accent-muted); color: var(--accent); }
+
+@media (max-width: 1100px) {
+  .status-secondary,
+  .status-detail,
+  .status-secondary + .status-separator,
+  .status-detail + .status-separator {
+    display: none;
+  }
+
+  .status-filename { max-width: 260px; }
+  .status-outline-toggle { display: none; }
+}
+
+@media (max-width: 900px) {
+  .status-filename { max-width: 180px; }
+  .status-separator,
+  .status-version,
+  .status-btn { display: none; }
+}
 </style>

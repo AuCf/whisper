@@ -91,10 +91,10 @@
       <div class="divider"></div>
 
       <!-- Layout toggles -->
-      <button class="icon-btn" :class="{ active: store.showEditor && !store.showPreview }" data-tooltip="仅编辑" @click="setLayout('editor')">
+      <button class="icon-btn layout-editor" :class="{ active: store.showEditor && !store.showPreview }" data-tooltip="仅编辑" @click="setLayout('editor')">
         <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="18" height="18" rx="2"/><line x1="9" y1="3" x2="9" y2="21"/></svg>
       </button>
-      <button class="icon-btn" :class="{ active: store.showEditor && store.showPreview }" data-tooltip="分栏视图" @click="setLayout('split')">
+      <button class="icon-btn layout-split" :class="{ active: store.showEditor && store.showPreview }" data-tooltip="分栏视图" @click="setLayout('split')">
         <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="18" height="18" rx="2"/><line x1="12" y1="3" x2="12" y2="21"/></svg>
       </button>
       <button class="icon-btn" :class="{ active: !store.showEditor && store.showPreview }" data-tooltip="仅预览" @click="setLayout('preview')">

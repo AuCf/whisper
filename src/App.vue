@@ -1,5 +1,11 @@
 <template>
-  <div id="app-root" :class="{ 'focus-mode': store.focusMode }">
+  <div
+    id="app-root"
+    :class="{
+      'focus-mode': store.focusMode,
+      'view-split': store.showEditor && store.showPreview,
+    }"
+  >
     <!-- Toolbar -->
     <Toolbar
       :sync-scroll="syncScroll.isSyncing.value"
@@ -57,22 +63,10 @@
           <div v-if="!store.activeTab" class="welcome-screen">
             <div class="welcome-content">
               <div class="welcome-logo">
-                <svg width="64" height="64" viewBox="0 0 24 24" fill="none" stroke="url(#grad)" stroke-width="1.5">
-                  <defs>
-                    <linearGradient id="grad" x1="0%" y1="0%" x2="100%" y2="100%">
-                      <stop offset="0%" style="stop-color:#388bfd"/>
-                      <stop offset="100%" style="stop-color:#58a6ff"/>
-                    </linearGradient>
-                  </defs>
-                  <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/>
-                  <polyline points="14 2 14 8 20 8"/>
-                  <line x1="16" y1="13" x2="8" y2="13"/>
-                  <line x1="16" y1="17" x2="8" y2="17"/>
-                  <polyline points="10 9 9 9 8 9"/>
-                </svg>
+                <img src="/app-icon.png" alt="" width="56" height="56" draggable="false" />
               </div>
               <h2 class="welcome-title">Whisper Markdown</h2>
-              <p class="welcome-subtitle">离线、高颜值的全平台 Markdown 编辑器</p>
+              <p class="welcome-subtitle">本地 Markdown 编辑与预览</p>
               <div class="welcome-actions">
                 <button class="welcome-btn primary" @click="store.newDocument()">
                   <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
@@ -111,6 +105,7 @@
 
 <script setup>
 import { ref, onMounted, onUnmounted, nextTick } from 'vue'
+import { invoke } from '@tauri-apps/api/core'
 import { getCurrentWindow } from '@tauri-apps/api/window'
 import { open } from '@tauri-apps/plugin-dialog'
 import { useEditorStore } from './stores/editorStore.js'
@@ -316,6 +311,15 @@ onMounted(async () => {
   store.initViewState()
   await store.restoreWorkspaces()
   const restored = await store.restoreTabsSession()
+  let openedStartupFile = false
+  try {
+    const startupFiles = await invoke('get_startup_files')
+    for (const filePath of startupFiles) {
+      if (await store.openFile(filePath)) openedStartupFile = true
+    }
+  } catch (err) {
+    console.warn('读取系统启动文件失败:', err)
+  }
   window.addEventListener('keydown', onKeydown)
   window.addEventListener('dragover', onGlobalDragOver)
   window.addEventListener('drop', onGlobalDrop)
@@ -353,8 +357,8 @@ onMounted(async () => {
   }).then((unlisten) => {
     cleanupCloseRequested = unlisten
   })
-  // If no tabs session was restored, create welcome document
-  if (!restored && store.tabs.length === 0) {
+  // Create the welcome document only when neither a session nor a launch file is available.
+  if (!restored && !openedStartupFile && store.tabs.length === 0) {
     store.newDocument()
     // Populate with demo content
     nextTick(() => {
@@ -524,7 +528,7 @@ onUnmounted(() => {
   background: var(--border);
   cursor: col-resize;
   flex-shrink: 0;
-  transition: all var(--transition);
+  transition: background var(--transition), box-shadow var(--transition);
   position: relative;
   z-index: 5;
 }
@@ -555,25 +559,37 @@ onUnmounted(() => {
   display: flex;
   flex-direction: column;
   align-items: center;
-  gap: 16px;
+  gap: 14px;
   padding: 40px;
   text-align: center;
-  animation: fadeIn 0.5s both;
+  animation: welcomeEnter 220ms ease-out both;
 }
 .welcome-logo {
-  filter: drop-shadow(0 0 24px rgba(88,166,255,0.4));
-  margin-bottom: 8px;
+  width: 64px;
+  height: 64px;
+  display: grid;
+  place-items: center;
+  margin-bottom: 6px;
+  border: 1px solid var(--border-subtle);
+  border-radius: 18px;
+  background: var(--bg-surface);
+  box-shadow: var(--shadow-sm);
+}
+.welcome-logo img {
+  width: 56px;
+  height: 56px;
+  object-fit: contain;
 }
 .welcome-title {
-  font-size: 2.2rem;
-  font-weight: 700;
+  font-size: 1.75rem;
+  font-weight: 650;
   color: var(--text-primary);
-  letter-spacing: -0.5px;
+  letter-spacing: -0.35px;
 }
 .welcome-subtitle {
-  font-size: 15px;
+  font-size: 13px;
   color: var(--text-secondary);
-  margin-top: -8px;
+  margin-top: -6px;
 }
 .welcome-actions {
   display: flex;
@@ -592,7 +608,7 @@ onUnmounted(() => {
   background: var(--bg-elevated);
   color: var(--text-primary);
   border: 1px solid var(--border);
-  transition: all var(--transition);
+  transition: background var(--transition), border-color var(--transition), color var(--transition);
 }
 .welcome-btn:hover {
   background: var(--bg-hover);
@@ -632,6 +648,47 @@ onUnmounted(() => {
   font-size: 11px;
   color: var(--text-primary);
   box-shadow: 0 1px 0 var(--border);
+}
+
+@keyframes welcomeEnter {
+  from { opacity: 0; transform: translateY(4px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+/* Preserve the user's saved view state while adapting the visible layout. */
+@media (max-width: 1100px) {
+  .outline-panel {
+    width: 0 !important;
+    opacity: 0;
+    pointer-events: none;
+    border-left: 0;
+  }
+}
+
+@media (max-width: 900px) {
+  .view-split .pane-divider,
+  .view-split .preview-wrap {
+    display: none !important;
+  }
+
+  .view-split .editor-wrap {
+    width: 100% !important;
+    flex: 1 1 auto !important;
+  }
+
+  .view-split .toolbar .layout-split.active {
+    background: transparent;
+    color: var(--text-secondary);
+  }
+
+  .view-split .toolbar .layout-editor {
+    background: var(--accent-muted);
+    color: var(--accent);
+  }
+
+  .welcome-content {
+    padding: 28px 24px;
+  }
 }
 
 /* ─── Focus mode transition ───────────────────────────────── */

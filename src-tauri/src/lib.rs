@@ -11,6 +11,7 @@ pub fn run() {
         .plugin(tauri_plugin_updater::Builder::new().build())
         .plugin(tauri_plugin_process::init())
         .invoke_handler(tauri::generate_handler![
+            get_startup_files,
             read_file,
             write_file,
             write_binary_file,
