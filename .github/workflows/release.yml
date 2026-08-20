@@ -15,12 +15,16 @@ jobs:
         include:
           - platform: 'windows-latest'
             target: 'x86_64-pc-windows-msvc'
+            build_args: '--target x86_64-pc-windows-msvc'
           - platform: 'macos-latest'
             target: 'aarch64-apple-darwin'
+            build_args: '--target aarch64-apple-darwin'
           - platform: 'macos-latest'
             target: 'x86_64-apple-darwin'
+            build_args: '--target x86_64-apple-darwin'
           - platform: 'ubuntu-22.04'
             target: 'x86_64-unknown-linux-gnu'
+            build_args: '--target x86_64-unknown-linux-gnu --bundles deb,appimage'
 
     runs-on: ${{ matrix.platform }}
     steps:
@@ -71,4 +75,4 @@ jobs:
           releaseBody: ${{ steps.tag_notes.outputs.notes }}
           releaseDraft: false
           prerelease: false
-          args: --target ${{ matrix.target }}
+          args: ${{ matrix.build_args }}
