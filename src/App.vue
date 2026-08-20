@@ -130,6 +130,7 @@ const store = useEditorStore()
 const syncScroll = useSyncScroll()
 const { render: renderMarkdown } = useMarkdown()
 const { checkForUpdates } = useUpdater()
+const modal = useModal()
 const appWindow = getCurrentWindow()
 
 const modalEl = ref(null)
@@ -243,9 +244,45 @@ function onJumpToLine(lineNumber) {
   editorRef.value?.scrollToLine?.(lineNumber)
 }
 
+let reloadRequestPending = false
+
+async function reloadActiveTab() {
+  if (reloadRequestPending) return
+  const tab = store.activeTab
+  if (!tab?.path) return
+
+  reloadRequestPending = true
+  const hadUnsavedChanges = tab.isDirty
+  if (hadUnsavedChanges) store.cancelPendingAutoSave(tab.id)
+
+  try {
+    if (hadUnsavedChanges) {
+      const confirmed = await modal.confirm(
+        '重新载入当前文件',
+        `“${tab.name}”有未保存的修改。重新载入将使用磁盘内容并放弃这些修改，是否继续？`
+      )
+      if (!confirmed) {
+        store.scheduleAutoSave(tab.id)
+        return
+      }
+    }
+
+    const reloaded = await store.reloadFile(tab.id)
+    if (!reloaded && tab.isDirty) store.scheduleAutoSave(tab.id)
+  } finally {
+    reloadRequestPending = false
+  }
+}
+
 // ── Keyboard shortcuts ────────────────────────────────────────
 function onKeydown(e) {
   const key = e.key.toLowerCase()
+  // Reload only the active document from disk instead of refreshing the WebView.
+  if (e.ctrlKey && key === 'r') {
+    e.preventDefault()
+    void reloadActiveTab()
+    return
+  }
   if (e.key === 'Escape') {
     if (showQuickOpen.value) { showQuickOpen.value = false; return }
     if (showSearch.value) { showSearch.value = false; return }
@@ -339,7 +376,6 @@ onMounted(async () => {
   } catch (err) {
     console.warn('Register native drag drop event failed:', err)
   }
-  const modal = useModal()
   appWindow.onCloseRequested(async (event) => {
     event.preventDefault()
     const hasUnsavedChanges = store.tabs.some(tab => tab.isDirty)

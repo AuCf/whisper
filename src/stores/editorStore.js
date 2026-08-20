@@ -195,6 +195,22 @@ export const useEditorStore = defineStore('editor', () => {
     }
   }
 
+  async function reloadFile(id) {
+    const tab = tabs.value.find(t => t.id === id)
+    if (!tab?.path) return false
+    try {
+      const content = await invoke('read_file', { path: tab.path })
+      clearAutoSave(id)
+      tab.content = content
+      tab.isDirty = false
+      persistTabsSession()
+      return true
+    } catch (err) {
+      notifyError('刷新文件', err)
+      return false
+    }
+  }
+
   async function saveFile(id) {
     const tab = tabs.value.find(t => t.id === id)
     if (!tab) return false
@@ -462,6 +478,10 @@ export const useEditorStore = defineStore('editor', () => {
     autoSaveTimers.delete(id)
   }
 
+  function cancelPendingAutoSave(id) {
+    clearAutoSave(id)
+  }
+
   function scheduleAutoSave(id) {
     clearAutoSave(id)
     const tab = tabs.value.find(t => t.id === id)
@@ -598,9 +618,11 @@ export const useEditorStore = defineStore('editor', () => {
     // Tab actions
     openTab, closeTab, closeActiveTab, setActiveTab, updateContent, setCursorPosition,
     // File actions
-    openFile, saveFile, saveFileAs, saveActiveFile, createNewFile, createNewDir, deletePath,
+    openFile, reloadFile, saveFile, saveFileAs, saveActiveFile,
+    createNewFile, createNewDir, deletePath,
     renamePath, openWorkspace, restoreWorkspaces, refreshFileTree, refreshAllWorkspaces,
-    setActiveWorkspace, setWorkspaceExpanded, setWorkspaceRemark, removeWorkspace, newDocument, scheduleAutoSave,
+    setActiveWorkspace, setWorkspaceExpanded, setWorkspaceRemark, removeWorkspace, newDocument,
+    scheduleAutoSave, cancelPendingAutoSave,
     // Session & Theme
     initTheme, setTheme, initPreviewStyle, setPreviewStyle, initViewState, persistViewState,
     toggleSidebarMini, restoreTabsSession, persistTabsSession,

@@ -251,11 +251,16 @@ watch(
     if (!view.value) return
     const current = view.value.state.doc.toString()
     if (newContent !== undefined && newContent !== current) {
+      const currentSelection = view.value.state.selection.main
+      const nextLength = newContent.length
       syncingExternalContent = true
       try {
         view.value.dispatch({
           changes: { from: 0, to: current.length, insert: newContent },
-          selection: { anchor: 0 },
+          selection: {
+            anchor: Math.min(currentSelection.anchor, nextLength),
+            head: Math.min(currentSelection.head, nextLength),
+          },
         })
       } finally {
         syncingExternalContent = false
