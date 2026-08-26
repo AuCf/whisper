@@ -6,6 +6,11 @@
         <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/></svg>
         {{ store.activeTab.path || store.activeTab.name }}
         <span v-if="store.activeTab.isDirty" class="status-dirty">●</span>
+        <span
+          v-if="store.activeTab.externalChanged"
+          class="status-external-change"
+          title="磁盘文件已在外部修改，自动保存已暂停"
+        >外部已修改</span>
       </span>
     </div>
 
@@ -143,6 +148,11 @@ const readingTime = computed(() => {
   text-overflow: ellipsis;
 }
 .status-dirty { color: var(--yellow); font-size: 12px; line-height: 1; }
+.status-external-change {
+  color: var(--red);
+  font-size: 10.5px;
+  font-weight: 600;
+}
 .status-separator { color: var(--border); opacity: 0.8; }
 .status-brand {
   font-weight: 600;

@@ -3,6 +3,7 @@ use std::env;
 use std::fs;
 use std::fs::OpenOptions;
 use std::path::Path;
+use std::time::UNIX_EPOCH;
 use tauri::{command, Manager};
 
 #[derive(Serialize, Deserialize, Debug)]
@@ -11,6 +12,32 @@ pub struct FileEntry {
     pub path: String,
     pub is_dir: bool,
     pub children: Option<Vec<FileEntry>>,
+}
+
+#[derive(Serialize)]
+pub struct FileSnapshot {
+    pub content: String,
+    pub version: String,
+}
+
+#[derive(Serialize)]
+pub struct WriteFileOutcome {
+    pub status: &'static str,
+    pub version: Option<String>,
+}
+
+fn file_version(path: &Path) -> Result<String, String> {
+    let metadata = fs::metadata(path).map_err(|e| e.to_string())?;
+    let modified = metadata.modified().map_err(|e| e.to_string())?;
+    let elapsed = modified
+        .duration_since(UNIX_EPOCH)
+        .map_err(|e| e.to_string())?;
+    Ok(format!(
+        "{}:{}:{}",
+        elapsed.as_secs(),
+        elapsed.subsec_nanos(),
+        metadata.len()
+    ))
 }
 
 fn is_supported_document(path: &Path) -> bool {
@@ -38,10 +65,28 @@ pub fn get_startup_files() -> Vec<String> {
         .collect()
 }
 
-/// Read a file's content as a UTF-8 string
+/// Read file contents together with the disk version used for conflict detection.
 #[command]
-pub fn read_file(path: String) -> Result<String, String> {
-    fs::read_to_string(&path).map_err(|e| e.to_string())
+pub fn read_file_snapshot(path: String) -> Result<FileSnapshot, String> {
+    let path = Path::new(&path);
+    for _ in 0..3 {
+        let version_before = file_version(path)?;
+        let content = fs::read_to_string(path).map_err(|e| e.to_string())?;
+        let version_after = file_version(path)?;
+        if version_before == version_after {
+            return Ok(FileSnapshot {
+                content,
+                version: version_after,
+            });
+        }
+    }
+    Err("读取文件时检测到持续的外部修改，请稍后重试".into())
+}
+
+/// Return the current disk version without reading the document into the WebView.
+#[command]
+pub fn get_file_version(path: String) -> Result<String, String> {
+    file_version(Path::new(&path))
 }
 
 /// Write content to a file (creates if not exists)
@@ -52,6 +97,37 @@ pub fn write_file(path: String, content: String) -> Result<(), String> {
         fs::create_dir_all(parent).map_err(|e| e.to_string())?;
     }
     fs::write(&path, content).map_err(|e| e.to_string())
+}
+
+/// Save only when the file still matches the version last read by the editor.
+#[command]
+pub fn write_file_checked(
+    path: String,
+    content: String,
+    expected_version: Option<String>,
+    force: bool,
+) -> Result<WriteFileOutcome, String> {
+    let file_path = Path::new(&path);
+    if !force {
+        if let Some(expected) = expected_version {
+            let current = file_version(file_path)?;
+            if current != expected {
+                return Ok(WriteFileOutcome {
+                    status: "conflict",
+                    version: Some(current),
+                });
+            }
+        }
+    }
+
+    if let Some(parent) = file_path.parent() {
+        fs::create_dir_all(parent).map_err(|e| e.to_string())?;
+    }
+    fs::write(file_path, content).map_err(|e| e.to_string())?;
+    Ok(WriteFileOutcome {
+        status: "saved",
+        version: Some(file_version(file_path)?),
+    })
 }
 
 /// Write binary data to a file (used for clipboard images)
@@ -187,7 +263,11 @@ pub struct SearchResult {
     pub matches: Vec<SearchMatch>,
 }
 
-fn search_dir_recursive(path: &str, query: &str, results: &mut Vec<SearchResult>) -> std::io::Result<()> {
+fn search_dir_recursive(
+    path: &str,
+    query: &str,
+    results: &mut Vec<SearchResult>,
+) -> std::io::Result<()> {
     if query.is_empty() {
         return Ok(());
     }
@@ -200,11 +280,19 @@ fn search_dir_recursive(path: &str, query: &str, results: &mut Vec<SearchResult>
         let path_str = entry_path.to_string_lossy().to_string();
 
         if meta.is_dir() {
-            if !name.starts_with('.') && name != "node_modules" && name != "target" && name != "dist" {
+            if !name.starts_with('.')
+                && name != "node_modules"
+                && name != "target"
+                && name != "dist"
+            {
                 let _ = search_dir_recursive(&path_str, query, results);
             }
         } else {
-            let ext = entry_path.extension().and_then(|e| e.to_str()).unwrap_or("").to_lowercase();
+            let ext = entry_path
+                .extension()
+                .and_then(|e| e.to_str())
+                .unwrap_or("")
+                .to_lowercase();
             if matches!(ext.as_str(), "md" | "markdown" | "txt" | "mdx") {
                 if let Ok(content) = fs::read_to_string(&entry_path) {
                     let mut matches = vec![];
@@ -242,4 +330,48 @@ pub fn search_workspace(path: String, query: String) -> Result<Vec<SearchResult>
     }
     search_dir_recursive(&path, query, &mut results).map_err(|e| e.to_string())?;
     Ok(results)
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+    use std::time::{SystemTime, UNIX_EPOCH};
+
+    fn temporary_document_path() -> std::path::PathBuf {
+        let unique = SystemTime::now()
+            .duration_since(UNIX_EPOCH)
+            .expect("system time should be after Unix epoch")
+            .as_nanos();
+        std::env::temp_dir().join(format!(
+            "whisper-conflict-{}-{unique}.md",
+            std::process::id()
+        ))
+    }
+
+    #[test]
+    fn checked_write_preserves_external_changes_until_forced() {
+        let path = temporary_document_path();
+        fs::write(&path, "initial").expect("create temporary document");
+        let path_string = path.to_string_lossy().into_owned();
+        let snapshot = read_file_snapshot(path_string.clone()).expect("read initial snapshot");
+
+        fs::write(&path, "external change").expect("simulate external editor");
+        let conflict = write_file_checked(
+            path_string.clone(),
+            "local change".into(),
+            Some(snapshot.version),
+            false,
+        )
+        .expect("check conflicting write");
+
+        assert_eq!(conflict.status, "conflict");
+        assert_eq!(fs::read_to_string(&path).unwrap(), "external change");
+
+        let saved = write_file_checked(path_string, "local change".into(), None, true)
+            .expect("force confirmed write");
+        assert_eq!(saved.status, "saved");
+        assert_eq!(fs::read_to_string(&path).unwrap(), "local change");
+
+        let _ = fs::remove_file(path);
+    }
 }

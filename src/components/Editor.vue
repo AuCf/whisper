@@ -17,7 +17,7 @@ import { useEditorStore } from '../stores/editorStore.js'
 import { getClipboardImage, saveClipboardImage } from '../composables/useClipboardImage.js'
 
 const props = defineProps({ tabId: String })
-const emit = defineEmits(['update', 'scroll-el'])
+const emit = defineEmits(['update', 'scroll-el', 'save'])
 
 const store = useEditorStore()
 const editorContainer = ref(null)
@@ -169,7 +169,7 @@ function createEditor(initialContent) {
       indentWithTab,
       { key: 'Ctrl-b', run: () => { insertFormat('bold'); return true } },
       { key: 'Ctrl-i', run: () => { insertFormat('italic'); return true } },
-      { key: 'Ctrl-s', run: () => { store.saveActiveFile(); return true } },
+      { key: 'Ctrl-s', run: () => { emit('save'); return true } },
     ]),
     EditorView.updateListener.of(update => {
       if (update.selectionSet || update.docChanged) {
@@ -192,7 +192,7 @@ function createEditor(initialContent) {
 
         ;(async () => {
           const inserted = await saveClipboardImage(image, editorView, tab?.path || null)
-          if (inserted && tab?.path) await store.saveFile(tab.id)
+          if (inserted && tab?.path) emit('save')
         })()
 
         return true
@@ -206,7 +206,7 @@ function createEditor(initialContent) {
 
         ;(async () => {
           const inserted = await saveClipboardImage(image, editorView, tab?.path || null)
-          if (inserted && tab?.path) await store.saveFile(tab.id)
+          if (inserted && tab?.path) emit('save')
         })()
 
         return true

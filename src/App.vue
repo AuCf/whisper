@@ -12,6 +12,7 @@
       @toggle-sync="syncScroll.toggleSync()"
       @insert="onInsert"
       @export="onExport"
+      @save="requestSaveActiveFile"
     />
 
     <!-- Main content area -->
@@ -40,6 +41,7 @@
             :tab-id="store.activeTabId"
             @update="onContentUpdate"
             @scroll-el="onEditorScrollEl"
+            @save="requestSaveActiveFile"
           />
 
           <!-- Divider (only in split mode) -->
@@ -245,9 +247,64 @@ function onJumpToLine(lineNumber) {
 }
 
 let reloadRequestPending = false
+let externalCheckTimer = null
+let externalPromptPending = false
+
+async function requestSaveActiveFile() {
+  if (externalPromptPending) return
+  const tab = store.activeTab
+  if (!tab) return
+
+  const result = await store.saveActiveFile()
+  if (result !== 'conflict') return
+
+  externalPromptPending = true
+  try {
+    const overwrite = await modal.confirm({
+      title: '文件已在外部修改',
+      message: `“${tab.name}”的磁盘内容已经变化。继续保存会覆盖外部修改，是否确定覆盖？`,
+      confirmText: '覆盖保存',
+      cancelText: '取消',
+    })
+    if (overwrite) await store.saveFile(tab.id, true)
+  } finally {
+    externalPromptPending = false
+  }
+}
+
+async function checkActiveFileForExternalChanges() {
+  if (externalPromptPending || document.hidden) return
+  const tab = store.activeTab
+  if (!tab?.path) return
+
+  const changed = await store.checkExternalChange(tab.id)
+  if (!changed || tab.externalChangeAcknowledged) return
+
+  if (!tab.isDirty) {
+    await store.reloadFile(tab.id)
+    return
+  }
+
+  externalPromptPending = true
+  try {
+    const reload = await modal.confirm({
+      title: '检测到外部修改',
+      message: `“${tab.name}”已被其他程序修改，同时 Whisper 中还有未保存内容。\n\n重新载入将采用磁盘内容；保留当前内容会暂停自动保存，之后手动保存时可选择是否覆盖。`,
+      confirmText: '重新载入',
+      cancelText: '保留当前',
+    })
+    if (reload) {
+      await store.reloadFile(tab.id)
+    } else {
+      store.acknowledgeExternalChange(tab.id)
+    }
+  } finally {
+    externalPromptPending = false
+  }
+}
 
 async function reloadActiveTab() {
-  if (reloadRequestPending) return
+  if (reloadRequestPending || externalPromptPending) return
   const tab = store.activeTab
   if (!tab?.path) return
 
@@ -306,7 +363,7 @@ function onKeydown(e) {
   }
   if (e.ctrlKey && key === 's' && !e.defaultPrevented) {
     e.preventDefault()
-    store.saveActiveFile()
+    void requestSaveActiveFile()
   }
   if (e.ctrlKey && key === 'w') {
     e.preventDefault()
@@ -358,8 +415,10 @@ onMounted(async () => {
     console.warn('读取系统启动文件失败:', err)
   }
   window.addEventListener('keydown', onKeydown)
+  window.addEventListener('focus', checkActiveFileForExternalChanges)
   window.addEventListener('dragover', onGlobalDragOver)
   window.addEventListener('drop', onGlobalDrop)
+  externalCheckTimer = window.setInterval(checkActiveFileForExternalChanges, 2000)
 
   // Native Tauri 2 file drop event listener
   try {
@@ -518,8 +577,10 @@ graph LR
 
 onUnmounted(() => {
   window.removeEventListener('keydown', onKeydown)
+  window.removeEventListener('focus', checkActiveFileForExternalChanges)
   window.removeEventListener('dragover', onGlobalDragOver)
   window.removeEventListener('drop', onGlobalDrop)
+  if (externalCheckTimer) window.clearInterval(externalCheckTimer)
   if (unlistenDragDrop) unlistenDragDrop()
   if (cleanupSync) cleanupSync()
   cleanupCloseRequested?.()

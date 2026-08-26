@@ -42,7 +42,14 @@
 
 ### 📑 状态持久化与多标签管理
 - **会话持久化 (Tabs Session Persistence)**：应用关闭或重新启动时，自动还原上次打开的所有文件标签页与当前激活的文档。
+- **多工作区记录**：保存多个常用文件夹，可折叠并快速切换不同项目的文档。
+- **外部修改保护**：文件被其他程序修改后自动重新载入；存在本地未保存内容时暂停自动保存并提示选择，避免静默覆盖。
 - **文件树智能排重**：避免同名文件夹节点重复渲染与意外碰撞报错。
+
+### 🖼️ 本地图片与多格式导出
+- **剪贴板图片粘贴**：在编辑器中按 `Ctrl+V` 自动保存图片并插入 Markdown 引用，本地预览立即可见。
+- **独立文件导出**：支持导出完整 HTML、PNG 长图和 PDF 文件，无需通过系统打印窗口中转。
+- **本地资源处理**：导出时保留 Markdown 排版、代码高亮、公式、图表和本地图片。
 
 ### 📊 增强型阅读状态栏
 - **精确字数统计**：独立区分**中文字数**、**英文单词数**、**总字符数**。
@@ -76,6 +83,7 @@
 
 - **Windows**: `Whisper_x64-setup.exe` (NSIS 安装包) 或 `Whisper_x64.msi`
 - **macOS**: `Whisper_aarch64.dmg` (Apple Silicon M 系列芯片) / `Whisper_x64.dmg` (Intel 芯片)
+- **Linux**: 从下一次成功的跨平台版本发布起提供 `.deb` 安装包和 `.AppImage` 便携程序
 
 ### 🍎 macOS 未签名应用无法打开提示修复
 
@@ -102,7 +110,7 @@ sudo xattr -rd com.apple.quarantine /Applications/Whisper.app
 ```bash
 git clone https://github.com/AuCf/whisper.git
 cd mdPreview
-npm install
+npm ci
 ```
 
 ### 3. 开发启动
@@ -116,6 +124,14 @@ npm run tauri dev
 npm run tauri build
 ```
 打包成功后，安装程序产物位于 `src-tauri/target/release/bundle/` 目录下。
+
+### 5. 回归测试
+
+```bash
+npm test
+```
+
+发布前还应按照 [桌面端回归清单](docs/REGRESSION_CHECKLIST.md) 检查文件操作、图片粘贴、导出、窗口控制和安装包。
 
 ---
 

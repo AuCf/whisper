@@ -12,8 +12,10 @@ pub fn run() {
         .plugin(tauri_plugin_process::init())
         .invoke_handler(tauri::generate_handler![
             get_startup_files,
-            read_file,
+            read_file_snapshot,
+            get_file_version,
             write_file,
+            write_file_checked,
             write_binary_file,
             read_binary_file,
             get_app_image_dir,

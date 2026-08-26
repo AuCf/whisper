@@ -13,7 +13,7 @@ export const useEditorStore = defineStore('editor', () => {
   // ── Files & Workspace ──────────────────────────────────────
   const workspaces = ref([]) // [{ path, name, isExpanded, tree }]
   const workspacePath = ref(null)
-  const tabs = ref([])        // [{ id, path, name, content, isDirty }]
+  const tabs = ref([])        // [{ id, path, name, content, isDirty, diskVersion, externalChanged }]
   const activeTabId = ref(null)
 
   // ── UI State ───────────────────────────────────────────────
@@ -99,14 +99,23 @@ export const useEditorStore = defineStore('editor', () => {
     return Date.now().toString(36) + Math.random().toString(36).slice(2)
   }
 
-  function openTab(path, name, content) {
+  function openTab(path, name, content, diskVersion = null) {
     const existing = tabs.value.find(t => t.path === path)
     if (existing) {
       activeTabId.value = existing.id
       persistTabsSession()
       return existing
     }
-    const tab = { id: createTabId(), path, name, content, isDirty: false }
+    const tab = {
+      id: createTabId(),
+      path,
+      name,
+      content,
+      isDirty: false,
+      diskVersion,
+      externalChanged: false,
+      externalChangeAcknowledged: false,
+    }
     tabs.value.push(tab)
     activeTabId.value = tab.id
     persistTabsSession()
@@ -114,6 +123,7 @@ export const useEditorStore = defineStore('editor', () => {
   }
 
   const autoSaveTimers = new Map()
+  const savingTabs = new Set()
 
   function closeTab(id, force = false) {
     const idx = tabs.value.findIndex(t => t.id === id)
@@ -186,9 +196,9 @@ export const useEditorStore = defineStore('editor', () => {
   // ── File Operations ────────────────────────────────────────
   async function openFile(path) {
     try {
-      const content = await invoke('read_file', { path })
+      const snapshot = await invoke('read_file_snapshot', { path })
       const name = path.split(/[\\/]/).pop()
-      return openTab(path, name, content)
+      return openTab(path, name, snapshot.content, snapshot.version)
     } catch (err) {
       notifyError('打开文件', err)
       return false
@@ -199,10 +209,13 @@ export const useEditorStore = defineStore('editor', () => {
     const tab = tabs.value.find(t => t.id === id)
     if (!tab?.path) return false
     try {
-      const content = await invoke('read_file', { path: tab.path })
+      const snapshot = await invoke('read_file_snapshot', { path: tab.path })
       clearAutoSave(id)
-      tab.content = content
+      tab.content = snapshot.content
       tab.isDirty = false
+      tab.diskVersion = snapshot.version
+      tab.externalChanged = false
+      tab.externalChangeAcknowledged = false
       persistTabsSession()
       return true
     } catch (err) {
@@ -211,24 +224,40 @@ export const useEditorStore = defineStore('editor', () => {
     }
   }
 
-  async function saveFile(id) {
+  async function saveFile(id, force = false) {
     const tab = tabs.value.find(t => t.id === id)
-    if (!tab) return false
+    if (!tab) return 'failed'
     if (!tab.path) return saveFileAs(id)
+    savingTabs.add(id)
     try {
-      await invoke('write_file', { path: tab.path, content: tab.content })
+      const outcome = await invoke('write_file_checked', {
+        path: tab.path,
+        content: tab.content,
+        expectedVersion: tab.diskVersion,
+        force,
+      })
+      if (outcome.status === 'conflict') {
+        clearAutoSave(id)
+        tab.externalChanged = true
+        return 'conflict'
+      }
       tab.isDirty = false
+      tab.diskVersion = outcome.version
+      tab.externalChanged = false
+      tab.externalChangeAcknowledged = false
       clearAutoSave(id)
-      return true
+      return 'saved'
     } catch (err) {
       notifyError('保存文件', err)
-      return false
+      return 'failed'
+    } finally {
+      savingTabs.delete(id)
     }
   }
 
   async function saveFileAs(id) {
     const tab = tabs.value.find(t => t.id === id)
-    if (!tab) return false
+    if (!tab) return 'failed'
     const defaultPath = workspacePath.value
       ? joinPath(workspacePath.value, tab.name)
       : tab.name
@@ -238,24 +267,55 @@ export const useEditorStore = defineStore('editor', () => {
         defaultPath,
         filters: [{ name: 'Markdown', extensions: ['md', 'markdown', 'mdx', 'txt'] }],
       })
-      if (!selected) return false
+      if (!selected) return 'cancelled'
       await invoke('write_file', { path: selected, content: tab.content })
+      const version = await invoke('get_file_version', { path: selected })
       tab.path = selected
       tab.name = selected.split(/[\\/]/).pop()
       tab.isDirty = false
+      tab.diskVersion = version
+      tab.externalChanged = false
+      tab.externalChangeAcknowledged = false
       clearAutoSave(id)
       await refreshWorkspaceForPath(selected)
-      return true
+      return 'saved'
     } catch (err) {
       notifyError('另存文件', err)
-      return false
+      return 'failed'
     }
   }
 
-  async function saveActiveFile() {
+  async function saveActiveFile(force = false) {
     if (activeTabId.value) {
-      await saveFile(activeTabId.value)
+      return saveFile(activeTabId.value, force)
     }
+    return 'failed'
+  }
+
+  async function checkExternalChange(id) {
+    const tab = tabs.value.find(t => t.id === id)
+    if (!tab?.path || savingTabs.has(id) || tab.externalChanged) return Boolean(tab?.externalChanged)
+    try {
+      const currentVersion = await invoke('get_file_version', { path: tab.path })
+      if (!tab.diskVersion) {
+        tab.diskVersion = currentVersion
+        return false
+      }
+      if (currentVersion !== tab.diskVersion) {
+        clearAutoSave(id)
+        tab.externalChanged = true
+        tab.externalChangeAcknowledged = false
+        return true
+      }
+    } catch (err) {
+      console.warn(`检查文件外部修改失败：${tab.path}`, err)
+    }
+    return false
+  }
+
+  function acknowledgeExternalChange(id) {
+    const tab = tabs.value.find(t => t.id === id)
+    if (tab) tab.externalChangeAcknowledged = true
   }
 
   async function createNewFile(dirPath, fileName) {
@@ -485,7 +545,7 @@ export const useEditorStore = defineStore('editor', () => {
   function scheduleAutoSave(id) {
     clearAutoSave(id)
     const tab = tabs.value.find(t => t.id === id)
-    if (!tab?.path) return
+    if (!tab?.path || tab.externalChanged) return
     const timer = setTimeout(() => {
       const currentTab = tabs.value.find(t => t.id === id)
       if (currentTab?.isDirty && currentTab.path) saveFile(id)
@@ -569,13 +629,16 @@ export const useEditorStore = defineStore('editor', () => {
     for (const item of saved.tabs) {
       if (item.path) {
         try {
-          const content = await invoke('read_file', { path: item.path })
+          const snapshot = await invoke('read_file_snapshot', { path: item.path })
           const tab = {
             id: item.id,
             path: item.path,
             name: item.name || item.path.split(/[\\/]/).pop(),
-            content,
+            content: snapshot.content,
             isDirty: false,
+            diskVersion: snapshot.version,
+            externalChanged: false,
+            externalChangeAcknowledged: false,
           }
           restoredTabs.push(tab)
           if (item.id === saved.activeTabId || item.path === saved.activeTabPath) {
@@ -619,6 +682,7 @@ export const useEditorStore = defineStore('editor', () => {
     openTab, closeTab, closeActiveTab, setActiveTab, updateContent, setCursorPosition,
     // File actions
     openFile, reloadFile, saveFile, saveFileAs, saveActiveFile,
+    checkExternalChange, acknowledgeExternalChange,
     createNewFile, createNewDir, deletePath,
     renamePath, openWorkspace, restoreWorkspaces, refreshFileTree, refreshAllWorkspaces,
     setActiveWorkspace, setWorkspaceExpanded, setWorkspaceRemark, removeWorkspace, newDocument,

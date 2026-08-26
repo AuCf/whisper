@@ -96,9 +96,12 @@ mdPreview/
     │   ├── Outline.vue         # 大纲目录跳转
     │   └── StatusBar.vue       # 底部状态栏
     ├── composables/            # 业务逻辑组合式函数
-    │   ├── useFileSystem.js    # 封装 Tauri Rust 原生文件 IO
     │   ├── useMarkdown.js      # marked + katex + highlight 渲染管道
-    │   └── useSyncScroll.js    # 双栏比例联动滚动
+    │   ├── useSyncScroll.js    # 双栏比例联动滚动
+    │   ├── useClipboardImage.js # 剪贴板图片保存与引用插入
+    │   ├── useLocalImages.js   # 本地图片读取与预览
+    │   ├── useExport.js        # HTML、PNG、PDF 文件导出
+    │   └── useUpdater.js       # 桌面端自动更新
     ├── stores/
     │   └── editorStore.js      # Pinia 全局状态（文件、Tab、全屏等）
     └── styles/
@@ -110,18 +113,23 @@ mdPreview/
 
 ## ⚙️ 编译打包与交付产物
 
-利用 Tauri 2.0 原生构建机制，应用在 Windows 下可打包生成 3 种格式：
+利用 Tauri 2.0 原生构建机制，应用可生成以下桌面产物：
 
-1. **绿色单文件免安装程序 (`.exe`)**：`src-tauri/target/release/whisper.exe` (~12.9 MB)
-2. **NSIS 安装向导 (`.exe`)**：`src-tauri/target/release/bundle/nsis/Whisper_0.1.0_x64-setup.exe` (~4.67 MB)
-3. **MSI 标准安装包 (`.msi`)**：`src-tauri/target/release/bundle/msi/Whisper_0.1.0_x64_en-US.msi` (~5.77 MB)
+1. **Windows**：免安装程序、NSIS 安装包与 MSI 安装包。
+2. **macOS**：Apple Silicon 与 Intel 架构的 DMG/应用程序。
+3. **Linux**：`.deb` 安装包与 `.AppImage` 便携程序。
+
+产物位于 `src-tauri/target/release/bundle/` 对应平台目录；具体文件名和体积随版本及平台变化。
+
+发布前运行 `npm test`，并按照 [`docs/REGRESSION_CHECKLIST.md`](docs/REGRESSION_CHECKLIST.md) 完成桌面端人工回归。
 
 ---
 
 ## 🚀 后续升级演进规划
 
-- [x] **导出功能扩展**：导出为 PDF（系统打印对话框）、HTML（独立完整文件）及 PNG 图片（html2canvas 截图）。
+- [x] **导出功能扩展**：直接导出 PDF 文件、独立 HTML 文件及 PNG 长图。
 - [x] **图片本地剪贴板粘贴**：直接粘贴剪贴板图片并自动存入文件同级 `assets/` 子目录，自动插入 Markdown 图片语法。
-- [x] **多主题切换**：支持深色 (GitHub Dark)、浅色 (GitHub Light) 与 Solarized 三种主题，含 CodeMirror + Mermaid + highlight.js 联动切换，主题选择持久化至 localStorage。
+- [x] **主题与排版预设**：支持 Dark、Light、Solarized 主题，以及 GitHub、VitePress、Editorial、Morandi、WeChat 五种预览排版，选择结果持久化保存。
+- [x] **外部修改检测与冲突保护**：自动检测磁盘文件变化；无本地修改时自动刷新，发生编辑冲突时暂停自动保存并由用户决定重新载入或覆盖。
+- [x] **最小回归体系**：使用 Node 内置测试覆盖 Markdown 核心渲染，并维护桌面端发布前人工检查清单。
 - [ ] **Vim / Emacs 按键模式**：在 CodeMirror 编辑器中开启经典编辑器按键映射。
-
