@@ -29,11 +29,13 @@
     "active": true,
     "targets": "all",
     "createUpdaterArtifacts": true,
-    "deb": {
-      "depends": [
-        "libgtk-3-0",
-        "libwebkit2gtk-4.0-37 | libwebkit2gtk-4.1-0 | libwebkit2gtk-4.0-dev"
-      ]
+    "linux": {
+      "deb": {
+        "depends": [
+          "libgtk-3-0",
+          "libwebkit2gtk-4.0-37 | libwebkit2gtk-4.1-0"
+        ]
+      }
     },
     "icon": [
       "icons/32x32.png",
