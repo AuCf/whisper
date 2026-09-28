@@ -1,6 +1,6 @@
 [package]
 name = "whisper"
-version = "1.0.3"
+version = "1.0.4"
 description = "Whisper Markdown editor and previewer"
 authors = ["you"]
 edition = "2021"

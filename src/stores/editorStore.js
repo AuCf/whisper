@@ -3,6 +3,7 @@ import { ref, computed, watch } from 'vue'
 import { invoke } from '@tauri-apps/api/core'
 import { getCurrentWindow } from '@tauri-apps/api/window'
 import { save } from '@tauri-apps/plugin-dialog'
+import { createNewDocumentContent } from '../markdown/newDocument.js'
 
 const WORKSPACES_KEY = 'whisper-workspaces'
 const LEGACY_WORKSPACE_KEY = 'whisper-last-workspace'
@@ -523,7 +524,7 @@ export const useEditorStore = defineStore('editor', () => {
       id,
       path: null,
       name: 'Untitled.md',
-      content: '# Untitled\n\n',
+      content: createNewDocumentContent(),
       isDirty: true,
     }
     tabs.value.push(tab)

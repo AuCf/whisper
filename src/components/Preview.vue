@@ -119,6 +119,22 @@ function onMouseUp() {
   isDragging.value = false
 }
 
+function scrollToHeading(id) {
+  const container = previewEl.value
+  const target = Array.from(
+    contentEl.value?.querySelectorAll('h1, h2, h3, h4, h5, h6') || []
+  ).find(heading => heading.id === id)
+  if (!container || !target) return false
+
+  const containerTop = container.getBoundingClientRect().top
+  const targetTop = target.getBoundingClientRect().top
+  const top = container.scrollTop + targetTop - containerTop - 20
+  container.scrollTo({ top: Math.max(0, top), behavior: 'smooth' })
+  target.classList.add('heading-highlight-flash')
+  setTimeout(() => target.classList.remove('heading-highlight-flash'), 1500)
+  return true
+}
+
 const renderedHtml = computed(() => render(store.activeContent))
 
 function bindNodeClickEvents() {
@@ -203,6 +219,7 @@ onUnmounted(cleanupLocalImages)
 defineExpose({
   getScrollEl: () => previewEl.value,
   getContentEl: () => contentEl.value,
+  scrollToHeading,
 })
 </script>
 
@@ -219,9 +236,15 @@ defineExpose({
   flex: 1;
   overflow-y: auto;
   overflow-x: hidden;
-  padding: 24px 32px 40px;
+  padding: 24px 32px 0;
   display: flex;
-  justify-content: center;
+  flex-direction: column;
+  align-items: center;
+}
+.preview-scroll::after {
+  content: '';
+  width: 100%;
+  flex: 0 0 clamp(72px, 10vh, 112px);
 }
 
 .mindmap-container {

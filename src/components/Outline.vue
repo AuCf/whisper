@@ -34,6 +34,7 @@ import { ref, computed, onMounted, onUnmounted, watch } from 'vue'
 import { useEditorStore } from '../stores/editorStore.js'
 import { createHeadingSlugger } from '../markdown/headingAnchors.js'
 
+const emit = defineEmits(['jump-heading'])
 const store = useEditorStore()
 const activeHeadingId = ref(null)
 let observer = null
@@ -44,13 +45,13 @@ const headings = computed(() => {
   const lines = content.split('\n')
   const result = []
   const slugger = createHeadingSlugger()
-  for (const line of lines) {
+  for (const [index, line] of lines.entries()) {
     const match = line.match(/^(#{1,6})\s+(.+)/)
     if (match) {
       const level = match[1].length
       const text = match[2].trim()
       const id = slugger.slug(text)
-      result.push({ level, text, id })
+      result.push({ level, text, id, line: index + 1 })
     }
   }
   return result
@@ -77,11 +78,10 @@ function updateActiveHeading() {
 }
 
 function scrollTo(id) {
+  const heading = headings.value.find(item => item.id === id)
+  if (!heading) return
   activeHeadingId.value = id
-  const el = document.getElementById(id)
-  if (el) {
-    el.scrollIntoView({ behavior: 'smooth', block: 'start' })
-  }
+  emit('jump-heading', heading)
 }
 
 onMounted(() => {

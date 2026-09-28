@@ -91,7 +91,7 @@
       </div>
 
       <!-- Outline panel -->
-      <Outline />
+      <Outline @jump-heading="onJumpToHeading" />
     </div>
 
     <!-- Status bar -->
@@ -246,6 +246,11 @@ function onJumpToLine(lineNumber) {
   editorRef.value?.scrollToLine?.(lineNumber)
 }
 
+function onJumpToHeading(heading) {
+  previewRef.value?.scrollToHeading?.(heading.id)
+  onJumpToLine(heading.line)
+}
+
 let reloadRequestPending = false
 let externalCheckTimer = null
 let externalPromptPending = false
@@ -334,6 +339,11 @@ async function reloadActiveTab() {
 // ── Keyboard shortcuts ────────────────────────────────────────
 function onKeydown(e) {
   const key = e.key.toLowerCase()
+  if (e.ctrlKey && !e.shiftKey && key === 'n') {
+    e.preventDefault()
+    store.newDocument()
+    return
+  }
   // Reload only the active document from disk instead of refreshing the WebView.
   if (e.ctrlKey && key === 'r') {
     e.preventDefault()

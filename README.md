@@ -64,7 +64,7 @@
 
 | 快捷键 | 功能说明 |
 | :--- | :--- |
-| `Ctrl + N` | 新建空白 Markdown 草稿 |
+| `Ctrl + N` | 新建带当前时间标题的 Markdown 草稿 |
 | `Ctrl + O` | 打开本地 Markdown 文件 |
 | `Ctrl + S` | 保存当前文件 |
 | `Ctrl + Shift + F` | 开启/关闭 **工作区全局搜索** |
